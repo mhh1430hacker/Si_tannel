@@ -48,7 +48,7 @@ This repository includes Vercel support for the frontend app.
 
 **Frontend Deployment:**
 1. Connect your repository to Vercel
-2. Set the **Root Directory** to the project folder containing `vercel.json`
+2. Set the **Root Directory** to `frontend` (this is where vercel.json and the Next.js package.json are located)
 3. Configure environment variables in Vercel dashboard:
    - `DATABASE_URL`: PostgreSQL connection string (use Vercel Postgres or external database)
    - `NEXT_PUBLIC_API_URL`: Backend API URL (deploy your backend separately)
@@ -62,8 +62,6 @@ The backend (FastAPI + PostgreSQL) requires separate deployment:
 
 **Environment Variables:**
 See `.env.example` for required environment variables.
-
-**Note:** This project uses a monorepo structure. When deploying to Vercel, ensure you set the correct root directory in your Vercel project settings.
 
 ### Environment Variables
 
