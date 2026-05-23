@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function Home() {
   const router = useRouter();
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/categories`)
+    fetch(`/api/categories`)
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -48,8 +46,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* Mastery Map link — static, meditative view */}
-        <div className="mt-10 pt-6 border-t border-gray-100">
+        <div className="mt-10 pt-6 border-t border-gray-100 flex gap-6 justify-center">
+          <a
+            href="/import"
+            className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+          >
+            استيراد أسئلة ←
+          </a>
           <a
             href="/mastery-map"
             className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"

@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import MasteryConstellation from "@/components/MasteryConstellation";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 
 interface ConstellationNode {
   id: number;
@@ -65,7 +65,7 @@ export default function MasteryMapPage() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`${API_BASE}/api/mastery/${userId}`);
+      const res = await fetch(`/api/mastery/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch constellation");
       const result: ConstellationData = await res.json();
       setData(result);
