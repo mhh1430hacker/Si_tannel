@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import ObservationalNudge from "@/components/ObservationalNudge";
 
@@ -33,7 +33,21 @@ function generateUUID(): string {
   return crypto.randomUUID();
 }
 
-export default function TestLab() {
+export default function TestLabPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-col items-center justify-center min-h-screen p-8">
+          <div className="animate-pulse h-32 bg-gray-200 rounded-xl w-full max-w-2xl" />
+        </main>
+      }
+    >
+      <TestLab />
+    </Suspense>
+  );
+}
+
+function TestLab() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") || "";
 
