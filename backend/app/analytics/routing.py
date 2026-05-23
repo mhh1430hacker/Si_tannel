@@ -70,8 +70,8 @@ def get_next_mvp_question(
 
 
 def get_first_question(db: Session, category: str) -> Question | None:
-    """Get a random easy question to start the session."""
-    return (
+    """Get a random question to start the session. Prefers easy, falls back to medium, then any."""
+    q = (
         db.query(Question)
         .filter(
             Question.skill_category == category,
@@ -80,3 +80,21 @@ def get_first_question(db: Session, category: str) -> Question | None:
         .order_by(func.random())
         .first()
     )
+    if not q:
+        q = (
+            db.query(Question)
+            .filter(
+                Question.skill_category == category,
+                Question.difficulty == QDifficulty.MEDIUM,
+            )
+            .order_by(func.random())
+            .first()
+        )
+    if not q:
+        q = (
+            db.query(Question)
+            .filter(Question.skill_category == category)
+            .order_by(func.random())
+            .first()
+        )
+    return q

@@ -183,11 +183,10 @@ def _parse_questions(data: list) -> list[FormQuestion]:
     for item in items:
         try:
             # item[1] = question title/text
-            # item[3] = question ID (string)
+            # item[3] = page/section number (NOT unique per question)
             # item[4] = question details array (type, choices, etc.)
 
             title = item[1] if len(item) > 1 and item[1] else ""
-            question_id = str(item[3]) if len(item) > 3 and item[3] else ""
 
             # Extract image from question container
             image_url = _extract_question_image(item)
@@ -200,6 +199,10 @@ def _parse_questions(data: list) -> list[FormQuestion]:
             q_details = item[4][0]  # First question element in the item
             if not q_details:
                 continue
+
+            # Use entry_id from q_details[0] as the unique question identifier
+            # item[3] is the page/section number and is NOT unique per question
+            question_id = str(q_details[0]) if q_details[0] is not None else ""
 
             # q_details[3] = question type (in newer forms)
             # In older/simpler forms, q_details has only 3 elements:
