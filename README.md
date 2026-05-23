@@ -48,11 +48,16 @@ This repository includes Vercel support for the frontend app.
 
 **Frontend Deployment:**
 1. Connect your repository to Vercel
-2. Set the **Root Directory** to `frontend` (this is where vercel.json and the Next.js package.json are located)
+2. **CRITICAL**: Set the **Root Directory** to `frontend` in Vercel project settings (this is where the Next.js package.json is located)
 3. Configure environment variables in Vercel dashboard:
    - `DATABASE_URL`: PostgreSQL connection string (use Vercel Postgres or external database)
    - `NEXT_PUBLIC_API_URL`: Backend API URL (deploy your backend separately)
 4. Deploy
+
+**Important Notes:**
+- The Root Directory MUST be set to `frontend` for Vercel to detect Next.js correctly
+- If you see "Missing public directory" error, check that Root Directory is set to `frontend`
+- Vercel will auto-detect Next.js from the package.json in the frontend directory
 
 **Backend Deployment:**
 The backend (FastAPI + PostgreSQL) requires separate deployment:
