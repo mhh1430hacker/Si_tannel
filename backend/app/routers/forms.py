@@ -65,7 +65,7 @@ class FormPreviewQuestion(BaseModel):
     question_id: str
     text: str
     image_url: str | None
-    question_type: int
+    question_type: int | None
     choices: list[dict]
     is_mcq: bool
 
@@ -94,7 +94,7 @@ async def preview_form(req: ImportFormRequest):
     preview_questions = []
     mcq_count = 0
     for q in form_data.questions:
-        is_mcq = q.question_type in MCQ_COMPATIBLE_TYPES and len(q.choices) >= 2
+        is_mcq = q.question_type is not None and q.question_type in MCQ_COMPATIBLE_TYPES and len(q.choices) >= 2
         if is_mcq:
             mcq_count += 1
         preview_questions.append(FormPreviewQuestion(
@@ -161,7 +161,7 @@ async def import_form(req: ImportFormRequest, db: Session = Depends(get_db)):
 
     for fq in form_data.questions:
         # Only import MCQ-compatible types with at least 2 choices
-        if fq.question_type not in MCQ_COMPATIBLE_TYPES or len(fq.choices) < 2:
+        if fq.question_type is None or fq.question_type not in MCQ_COMPATIBLE_TYPES or len(fq.choices) < 2:
             skipped += 1
             continue
 

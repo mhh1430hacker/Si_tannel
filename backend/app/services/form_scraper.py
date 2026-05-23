@@ -201,8 +201,20 @@ def _parse_questions(data: list) -> list[FormQuestion]:
             if not q_details:
                 continue
 
-            # q_details[3] = question type
-            q_type = q_details[3] if len(q_details) > 3 else -1
+            # q_details[3] = question type (in newer forms)
+            # In older/simpler forms, q_details has only 3 elements:
+            #   [0] = entry ID, [1] = options list, [2] = type flag
+            # If options exist at [1] but no index [3], infer MCQ from structure
+            if len(q_details) > 3 and q_details[3] is not None:
+                q_type = q_details[3]
+            elif len(q_details) >= 2 and isinstance(q_details[1], list) and len(q_details[1]) >= 2:
+                # Has multiple options — infer as MCQ (multiple choice)
+                q_type = QUESTION_TYPE_MULTIPLE_CHOICE
+            elif len(q_details) >= 2 and isinstance(q_details[1], list) and len(q_details[1]) >= 1:
+                # Single or few options — could be dropdown
+                q_type = QUESTION_TYPE_DROPDOWN
+            else:
+                q_type = QUESTION_TYPE_SHORT_TEXT
 
             # q_details[4] = required flag position varies
             is_required = False
@@ -219,7 +231,15 @@ def _parse_questions(data: list) -> list[FormQuestion]:
                     options_list = q_details[1]
                     if options_list:
                         for opt in options_list:
-                            choice_text = opt[0] if opt and len(opt) > 0 else ""
+                            if not opt:
+                                continue
+                            # Handle both formats:
+                            # Newer: ['text', None, None, None, 0]
+                            # Older: ['text']
+                            choice_text = opt[0] if len(opt) > 0 else ""
+                            if isinstance(choice_text, list):
+                                # Some forms nest text in another list
+                                choice_text = choice_text[0] if choice_text else ""
                             # Choice image at opt[3] or opt[2]
                             choice_img = None
                             try:
@@ -235,7 +255,7 @@ def _parse_questions(data: list) -> list[FormQuestion]:
 
                             if choice_text:
                                 choices.append(FormChoice(
-                                    text=choice_text,
+                                    text=str(choice_text),
                                     image_url=choice_img,
                                 ))
                 except (IndexError, TypeError):
