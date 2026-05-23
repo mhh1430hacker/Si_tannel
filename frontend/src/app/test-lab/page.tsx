@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import ObservationalNudge from "@/components/ObservationalNudge";
 
@@ -36,6 +36,31 @@ function generateUUID(): string {
 }
 
 export default function TestLab() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-col items-center justify-center min-h-screen p-8">
+          <div className="max-w-2xl w-full">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-1/4" />
+              <div className="h-20 bg-gray-200 rounded-xl" />
+              <div className="space-y-3">
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <TestLabContent />
+    </Suspense>
+  );
+}
+
+function TestLabContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") || "";
 
