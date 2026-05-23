@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import ObservationalNudge from "@/components/ObservationalNudge";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -34,9 +33,7 @@ function generateUUID(): string {
 }
 
 export default function TestLab() {
-  const searchParams = useSearchParams();
-  const category = searchParams.get("category") || "";
-
+  const [category, setCategory] = useState("");
   const [question, setQuestion] = useState<Question | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +52,11 @@ export default function TestLab() {
   const timerRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const skeletonTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setCategory(params.get("category") || "");
+  }, []);
 
   const startTimer = useCallback(() => {
     timerRef.current = 0;

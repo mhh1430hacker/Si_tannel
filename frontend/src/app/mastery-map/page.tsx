@@ -11,7 +11,6 @@
  */
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import MasteryConstellation from "@/components/MasteryConstellation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -43,12 +42,15 @@ interface ConstellationData {
 }
 
 export default function MasteryMapPage() {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get("user_id") || "";
-
+  const [userId, setUserId] = useState("");
   const [data, setData] = useState<ConstellationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setUserId(params.get("user_id") || "");
+  }, []);
 
   useEffect(() => {
     if (!userId) {
