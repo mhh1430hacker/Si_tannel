@@ -3,8 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import ObservationalNudge from "@/components/ObservationalNudge";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 interface Choice {
   id: number;
   choice_text: string;
@@ -84,7 +82,7 @@ export default function TestLab() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/question/first?category=${encodeURIComponent(category)}`
+        `/api/question/first?category=${encodeURIComponent(category)}`
       );
       if (!res.ok) throw new Error("Failed to fetch");
       const data: Question = await res.json();
@@ -106,7 +104,7 @@ export default function TestLab() {
     skeletonTimerRef.current = setTimeout(() => setShowSkeleton(true), 300);
 
     try {
-      const res = await fetch(`${API_BASE}/api/answer/submit`, {
+      const res = await fetch(`/api/answer/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -156,7 +154,7 @@ export default function TestLab() {
   async function fetchSummary() {
     try {
       const res = await fetch(
-        `${API_BASE}/api/session/${sessionIdRef.current}/summary`
+        `/api/session/${sessionIdRef.current}/summary`
       );
       if (res.ok) {
         const data: SessionSummary = await res.json();
