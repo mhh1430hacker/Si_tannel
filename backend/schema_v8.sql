@@ -1,36 +1,7 @@
--- Ainex Qudrat Lab V8: Cognitive Mirror Architecture
--- Full production schema supporting Phase 1-3
+-- Ainex Qudrat Lab V8: Cognitive Mirror Architecture Schema Extension
+-- Adds: mastery nodes, edges, session nudges, psychometric telemetry
 
-CREATE TYPE q_difficulty AS ENUM ('سهل', 'متوسط', 'صعب');
-
--- Core Test Engine Tables
-CREATE TABLE questions (
-    id SERIAL PRIMARY KEY,
-    content TEXT NOT NULL,
-    skill_category VARCHAR(100) NOT NULL,
-    difficulty q_difficulty NOT NULL,
-    expected_time_seconds INT NOT NULL
-);
-
-CREATE TABLE question_choices (
-    id SERIAL PRIMARY KEY,
-    question_id INT REFERENCES questions(id) ON DELETE CASCADE,
-    choice_text TEXT NOT NULL,
-    is_correct BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE user_answers (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    session_id UUID NOT NULL,
-    question_id INT REFERENCES questions(id),
-    chosen_choice_id INT REFERENCES question_choices(id),
-    time_taken_seconds INT NOT NULL,
-    is_correct BOOLEAN NOT NULL,
-    answered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- V8: Mastery Constellation Tables
+-- Mastery Constellation: Nodes represent skill sub-areas
 CREATE TABLE mastery_nodes (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
@@ -43,6 +14,7 @@ CREATE TABLE mastery_nodes (
     UNIQUE(user_id, skill_category, sub_skill)
 );
 
+-- Mastery Constellation: Edges connect related skill nodes
 CREATE TABLE mastery_edges (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
@@ -52,7 +24,7 @@ CREATE TABLE mastery_edges (
     UNIQUE(user_id, source_node_id, target_node_id)
 );
 
--- V8: NudgeLimiter Session Tracking
+-- Session Nudge Tracker: Enforces max 2 nudges per session
 CREATE TABLE session_nudges (
     id SERIAL PRIMARY KEY,
     session_id UUID NOT NULL,
@@ -62,7 +34,7 @@ CREATE TABLE session_nudges (
     delivered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- V8: Shadow Engine Telemetry
+-- Psychometric Telemetry: Background-processed behavioral data
 CREATE TABLE answer_telemetry (
     id SERIAL PRIMARY KEY,
     user_answer_id INT REFERENCES user_answers(id) ON DELETE CASCADE,
@@ -74,10 +46,6 @@ CREATE TABLE answer_telemetry (
     computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Performance Indexes
-CREATE INDEX idx_answers_session ON user_answers(session_id);
-CREATE INDEX idx_answers_user ON user_answers(user_id);
-CREATE INDEX idx_questions_category_difficulty ON questions(skill_category, difficulty);
 CREATE INDEX idx_mastery_nodes_user ON mastery_nodes(user_id);
 CREATE INDEX idx_mastery_edges_user ON mastery_edges(user_id);
 CREATE INDEX idx_session_nudges_session ON session_nudges(session_id);

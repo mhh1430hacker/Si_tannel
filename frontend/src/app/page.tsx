@@ -47,6 +47,16 @@ export default function Home() {
             ))}
           </div>
         )}
+
+        {/* Mastery Map link — static, meditative view */}
+        <div className="mt-10 pt-6 border-t border-gray-100">
+          <a
+            href="/mastery-map"
+            className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+          >
+            خريطة الإتقان ←
+          </a>
+        </div>
       </div>
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import ObservationalNudge from "@/components/ObservationalNudge";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -47,6 +48,7 @@ export default function TestLab() {
     is_correct: boolean;
     correct_choice_id: number;
   } | null>(null);
+  const [activeNudge, setActiveNudge] = useState<string | null>(null);
 
   const userIdRef = useRef(generateUUID());
   const sessionIdRef = useRef(generateUUID());
@@ -99,7 +101,6 @@ export default function TestLab() {
     setSubmitting(true);
     const timeTaken = stopTimer();
 
-    // Show skeleton only if response takes >300ms
     skeletonTimerRef.current = setTimeout(() => setShowSkeleton(true), 300);
 
     try {
@@ -126,7 +127,11 @@ export default function TestLab() {
         correct_choice_id: data.correct_choice_id,
       });
 
-      // Brief pause to show result feedback
+      // Deliver nudge if the Shadow Engine produced one (rare, max 2 per session)
+      if (data.nudge) {
+        setActiveNudge(data.nudge);
+      }
+
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
       if (data.next_question) {
@@ -136,7 +141,6 @@ export default function TestLab() {
         setQuestionNumber((n) => n + 1);
         startTimer();
       } else {
-        // No more questions — show summary
         await fetchSummary();
       }
     } catch {
@@ -157,7 +161,7 @@ export default function TestLab() {
         setSummary(data);
       }
     } catch {
-      // Silently fail
+      // Graceful degradation: summary failure doesn't break the app
     }
   }
 
@@ -169,10 +173,7 @@ export default function TestLab() {
       if (choiceId === lastResult.correct_choice_id) {
         return base + "border-green-500 bg-green-50 text-green-800";
       }
-      if (
-        choiceId === selectedChoice &&
-        !lastResult.is_correct
-      ) {
+      if (choiceId === selectedChoice && !lastResult.is_correct) {
         return base + "border-red-500 bg-red-50 text-red-800";
       }
       return base + "border-gray-200 bg-white text-gray-400";
@@ -253,10 +254,7 @@ export default function TestLab() {
           <p className="text-xl text-gray-600 mb-4">
             لا توجد أسئلة متاحة في هذا التصنيف
           </p>
-          <a
-            href="/"
-            className="text-blue-600 hover:underline font-medium"
-          >
+          <a href="/" className="text-blue-600 hover:underline font-medium">
             العودة للرئيسية
           </a>
         </div>
@@ -270,9 +268,7 @@ export default function TestLab() {
       <div className="max-w-2xl w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <span className="text-sm text-gray-500">
-            السؤال {questionNumber}
-          </span>
+          <span className="text-sm text-gray-500">السؤال {questionNumber}</span>
           <span className="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-600">
             {question.difficulty} • {question.skill_category}
           </span>
@@ -323,6 +319,14 @@ export default function TestLab() {
           </div>
         )}
       </div>
+
+      {/* Observational Nudge — rare, clinical, data-driven */}
+      {activeNudge && (
+        <ObservationalNudge
+          text={activeNudge}
+          onDismiss={() => setActiveNudge(null)}
+        />
+      )}
     </main>
   );
 }
