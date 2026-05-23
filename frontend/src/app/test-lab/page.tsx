@@ -9,6 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 interface Choice {
   id: number;
   choice_text: string;
+  image_url?: string | null;
 }
 
 interface Question {
@@ -17,6 +18,7 @@ interface Question {
   skill_category: string;
   difficulty: string;
   expected_time_seconds: number;
+  image_url?: string | null;
   choices: Choice[];
 }
 
@@ -277,6 +279,15 @@ export default function TestLab() {
         {/* Question */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <p className="text-lg leading-relaxed">{question.content}</p>
+          {question.image_url && (
+            <div className="mt-4 flex justify-center">
+              <img
+                src={question.image_url}
+                alt="صورة السؤال"
+                className="max-w-full max-h-64 rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
         </div>
 
         {/* Choices */}
@@ -290,7 +301,14 @@ export default function TestLab() {
               disabled={!!lastResult}
               className={getChoiceStyle(choice.id)}
             >
-              {choice.choice_text}
+              <span>{choice.choice_text}</span>
+              {choice.image_url && (
+                <img
+                  src={choice.image_url}
+                  alt=""
+                  className="mt-2 max-h-24 rounded border border-gray-100"
+                />
+              )}
             </button>
           ))}
         </div>

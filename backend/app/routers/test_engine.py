@@ -24,6 +24,7 @@ router = APIRouter(prefix="/api", tags=["test-engine"])
 class ChoiceOut(BaseModel):
     id: int
     choice_text: str
+    image_url: str | None = None
 
     class Config:
         from_attributes = True
@@ -35,6 +36,7 @@ class QuestionOut(BaseModel):
     skill_category: str
     difficulty: str
     expected_time_seconds: int
+    image_url: str | None = None
     choices: list[ChoiceOut]
 
     class Config:
@@ -72,7 +74,11 @@ def question_to_out(q: Question) -> QuestionOut:
         skill_category=q.skill_category,
         difficulty=q.difficulty.value,
         expected_time_seconds=q.expected_time_seconds,
-        choices=[ChoiceOut(id=c.id, choice_text=c.choice_text) for c in q.choices],
+        image_url=q.image_url,
+        choices=[
+            ChoiceOut(id=c.id, choice_text=c.choice_text, image_url=c.image_url)
+            for c in q.choices
+        ],
     )
 
 

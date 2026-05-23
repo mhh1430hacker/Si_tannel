@@ -29,7 +29,15 @@ export default function Home() {
         {loading ? (
           <div className="animate-pulse h-32 bg-gray-200 rounded-xl" />
         ) : categories.length === 0 ? (
-          <p className="text-gray-500">لا توجد تصنيفات متاحة حالياً</p>
+          <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">لا توجد أسئلة بعد</p>
+            <a
+              href="/import"
+              className="inline-block py-3 px-6 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            >
+              استيراد أسئلة من Google Forms
+            </a>
+          </div>
         ) : (
           <div className="grid gap-4">
             {categories.map((cat) => (
@@ -48,8 +56,14 @@ export default function Home() {
           </div>
         )}
 
-        {/* Mastery Map link — static, meditative view */}
-        <div className="mt-10 pt-6 border-t border-gray-100">
+        {/* Navigation links */}
+        <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col gap-3">
+          <a
+            href="/import"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+          >
+            استيراد أسئلة من Google Forms ←
+          </a>
           <a
             href="/mastery-map"
             className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"

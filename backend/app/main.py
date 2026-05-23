@@ -6,12 +6,12 @@ Decoupled Test Engine + Background Psychometric Shadow Engine.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import mastery, test_engine
+from app.routers import forms, mastery, test_engine
 
 app = FastAPI(
     title="Ainex Qudrat Lab",
-    version="8.0.0",
-    description="Cognitive Mirror for Qudrat Exam Mastery",
+    version="9.0.0",
+    description="Cognitive Mirror for Qudrat Exam Mastery — Google Form Integration",
 )
 
 app.add_middleware(
@@ -24,6 +24,7 @@ app.add_middleware(
 
 app.include_router(test_engine.router)
 app.include_router(mastery.router)
+app.include_router(forms.router)
 
 
 @app.get("/health")
