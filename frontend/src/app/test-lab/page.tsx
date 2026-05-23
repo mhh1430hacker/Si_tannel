@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import ObservationalNudge from "@/components/ObservationalNudge";
 
@@ -9,6 +9,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 interface Choice {
   id: number;
   choice_text: string;
+  image_url?: string | null;
 }
 
 interface Question {
@@ -17,6 +18,7 @@ interface Question {
   skill_category: string;
   difficulty: string;
   expected_time_seconds: number;
+  image_url?: string | null;
   choices: Choice[];
 }
 
@@ -34,6 +36,31 @@ function generateUUID(): string {
 }
 
 export default function TestLab() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-col items-center justify-center min-h-screen p-8">
+          <div className="max-w-2xl w-full">
+            <div className="animate-pulse space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-1/4" />
+              <div className="h-20 bg-gray-200 rounded-xl" />
+              <div className="space-y-3">
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+                <div className="h-12 bg-gray-200 rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <TestLabContent />
+    </Suspense>
+  );
+}
+
+function TestLabContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") || "";
 
@@ -277,6 +304,15 @@ export default function TestLab() {
         {/* Question */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <p className="text-lg leading-relaxed">{question.content}</p>
+          {question.image_url && (
+            <div className="mt-4 flex justify-center">
+              <img
+                src={question.image_url}
+                alt="صورة السؤال"
+                className="max-w-full max-h-64 rounded-lg border border-gray-200"
+              />
+            </div>
+          )}
         </div>
 
         {/* Choices */}
@@ -290,7 +326,14 @@ export default function TestLab() {
               disabled={!!lastResult}
               className={getChoiceStyle(choice.id)}
             >
-              {choice.choice_text}
+              <span>{choice.choice_text}</span>
+              {choice.image_url && (
+                <img
+                  src={choice.image_url}
+                  alt=""
+                  className="mt-2 max-h-24 rounded border border-gray-100"
+                />
+              )}
             </button>
           ))}
         </div>

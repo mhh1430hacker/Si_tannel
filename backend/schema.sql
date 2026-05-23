@@ -3,20 +3,36 @@
 
 CREATE TYPE q_difficulty AS ENUM ('سهل', 'متوسط', 'صعب');
 
+-- Form Import Tracking
+CREATE TABLE form_imports (
+    id SERIAL PRIMARY KEY,
+    form_url TEXT NOT NULL UNIQUE,
+    form_title VARCHAR(500),
+    skill_category VARCHAR(100) NOT NULL,
+    difficulty q_difficulty NOT NULL DEFAULT 'متوسط',
+    questions_imported INT DEFAULT 0,
+    imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Core Test Engine Tables
 CREATE TABLE questions (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
     skill_category VARCHAR(100) NOT NULL,
     difficulty q_difficulty NOT NULL,
-    expected_time_seconds INT NOT NULL
+    expected_time_seconds INT NOT NULL,
+    image_url TEXT,
+    form_import_id INT REFERENCES form_imports(id) ON DELETE SET NULL,
+    form_question_id VARCHAR(50)
 );
 
 CREATE TABLE question_choices (
     id SERIAL PRIMARY KEY,
     question_id INT REFERENCES questions(id) ON DELETE CASCADE,
     choice_text TEXT NOT NULL,
-    is_correct BOOLEAN DEFAULT FALSE
+    is_correct BOOLEAN DEFAULT FALSE,
+    image_url TEXT
 );
 
 CREATE TABLE user_answers (
@@ -78,6 +94,7 @@ CREATE TABLE answer_telemetry (
 CREATE INDEX idx_answers_session ON user_answers(session_id);
 CREATE INDEX idx_answers_user ON user_answers(user_id);
 CREATE INDEX idx_questions_category_difficulty ON questions(skill_category, difficulty);
+CREATE INDEX idx_questions_form_import ON questions(form_import_id);
 CREATE INDEX idx_mastery_nodes_user ON mastery_nodes(user_id);
 CREATE INDEX idx_mastery_edges_user ON mastery_edges(user_id);
 CREATE INDEX idx_session_nudges_session ON session_nudges(session_id);

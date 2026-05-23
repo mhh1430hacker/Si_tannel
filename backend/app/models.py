@@ -38,10 +38,16 @@ class Question(Base):
         nullable=False,
     )
     expected_time_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    form_import_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("form_imports.id", ondelete="SET NULL"), nullable=True
+    )
+    form_question_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     choices: Mapped[list["QuestionChoice"]] = relationship(
         back_populates="question", cascade="all, delete-orphan"
     )
+    form_import: Mapped["FormImport | None"] = relationship(back_populates="questions")
 
 
 class QuestionChoice(Base):
@@ -53,6 +59,7 @@ class QuestionChoice(Base):
     )
     choice_text: Mapped[str] = mapped_column(Text, nullable=False)
     is_correct: Mapped[bool] = mapped_column(Boolean, default=False)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     question: Mapped["Question"] = relationship(back_populates="choices")
 
@@ -127,6 +134,29 @@ class SessionNudge(Base):
     delivered_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow
     )
+
+
+class FormImport(Base):
+    __tablename__ = "form_imports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    form_url: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    form_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    skill_category: Mapped[str] = mapped_column(String(100), nullable=False)
+    difficulty: Mapped[QDifficulty] = mapped_column(
+        Enum(QDifficulty, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=QDifficulty.MEDIUM,
+    )
+    questions_imported: Mapped[int] = mapped_column(Integer, default=0)
+    imported_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+    last_synced_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+
+    questions: Mapped[list["Question"]] = relationship(back_populates="form_import")
 
 
 class AnswerTelemetry(Base):

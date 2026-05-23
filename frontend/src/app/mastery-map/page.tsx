@@ -10,7 +10,7 @@
  * - A slow, meditative view of cognitive growth.
  */
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import MasteryConstellation from "@/components/MasteryConstellation";
 
@@ -43,6 +43,22 @@ interface ConstellationData {
 }
 
 export default function MasteryMapPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex flex-col items-center justify-center min-h-screen p-8 bg-neutral-950">
+          <div className="w-full max-w-3xl animate-pulse">
+            <div className="h-64 bg-neutral-900 rounded-xl" />
+          </div>
+        </main>
+      }
+    >
+      <MasteryMapContent />
+    </Suspense>
+  );
+}
+
+function MasteryMapContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get("user_id") || "";
 
