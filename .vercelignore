@@ -10,3 +10,6 @@ node_modules/
 .venv/
 venv/
 *.log
+.env
+.env.local
+.env*.local

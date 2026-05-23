@@ -45,17 +45,25 @@ Open http://localhost:3000 to start the test lab.
 ### Deploying to Vercel
 
 This repository includes Vercel support for the frontend app.
-- Root deploy configuration: `vercel.json`
-- Frontend project is located in `frontend/`
 
-You can deploy from the repo with Vercel, or set the project root to `frontend` if necessary.
+**Frontend Deployment:**
+1. Connect your repository to Vercel
+2. Set the **Root Directory** to the project folder containing `vercel.json`
+3. Configure environment variables in Vercel dashboard:
+   - `DATABASE_URL`: PostgreSQL connection string (use Vercel Postgres or external database)
+   - `NEXT_PUBLIC_API_URL`: Backend API URL (deploy your backend separately)
+4. Deploy
 
-If you use the root workspace install, run:
+**Backend Deployment:**
+The backend (FastAPI + PostgreSQL) requires separate deployment:
+- Option 1: Deploy to Vercel using Python runtime
+- Option 2: Deploy to Railway, Render, or similar platform
+- Option 3: Use Docker with a container hosting service
 
-```bash
-npm install
-npm run build
-```
+**Environment Variables:**
+See `.env.example` for required environment variables.
+
+**Note:** This project uses a monorepo structure. When deploying to Vercel, ensure you set the correct root directory in your Vercel project settings.
 
 ### Environment Variables
 
