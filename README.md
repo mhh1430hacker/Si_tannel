@@ -44,36 +44,20 @@ Open http://localhost:3000 to start the test lab.
 
 ### Deploying to Vercel
 
-This repository includes Vercel support for the frontend app.
+The entire app (frontend + API routes) deploys as a single Vercel project. The root `vercel.json` uses `@vercel/next` builder pointing to `frontend/package.json`, so **no Root Directory change is needed** in Vercel project settings.
 
-**Frontend Deployment:**
+**Steps:**
 1. Connect your repository to Vercel
-2. **CRITICAL**: Set the **Root Directory** to `frontend` in Vercel project settings (this is where the Next.js package.json is located)
-3. Configure environment variables in Vercel dashboard:
-   - `DATABASE_URL`: PostgreSQL connection string (use Vercel Postgres or external database)
-   - `NEXT_PUBLIC_API_URL`: Backend API URL (deploy your backend separately)
-4. Deploy
+2. Add a **Vercel Postgres** database: Project → Storage → Create Database → PostgreSQL
+3. Deploy — Vercel will automatically build the Next.js app from `frontend/`
+4. After first deploy, initialize the database schema: `curl -X POST https://your-domain.vercel.app/api/setup`
+5. Import questions via the `/import` page (paste a public Google Form link)
 
-**Important Notes:**
-- The Root Directory MUST be set to `frontend` for Vercel to detect Next.js correctly
-- If you see "Missing public directory" error, check that Root Directory is set to `frontend`
-- Vercel will auto-detect Next.js from the package.json in the frontend directory
+**Environment Variables (auto-provided by Vercel Postgres):**
+- `POSTGRES_URL` — injected automatically when Vercel Postgres is connected
 
-**Backend Deployment:**
-The backend (FastAPI + PostgreSQL) requires separate deployment:
-- Option 1: Deploy to Vercel using Python runtime
-- Option 2: Deploy to Railway, Render, or similar platform
-- Option 3: Use Docker with a container hosting service
-
-**Environment Variables:**
-See `.env.example` for required environment variables.
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/ainex_qudrat` | PostgreSQL connection string |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend API URL |
+**Local Development:**
+See `.env.example` for local environment variables. The `backend/` directory with FastAPI + Docker is available for local dev.
 
 ## Adaptive Routing (Phase 1)
 
@@ -83,35 +67,47 @@ See `.env.example` for required environment variables.
 | Incorrect | Step DOWN difficulty (صعب → متوسط → سهل) |
 | No match | Fallback to متوسط |
 
-## API Endpoints
+## API Endpoints (Serverless)
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/categories` | List skill categories |
-| GET | `/api/question/first?category=X` | Get first question (easy) |
-| POST | `/api/answer/submit` | Submit answer, get next question |
+| GET | `/api/question/first?category=X` | Get first question (Easy→Medium→any fallback) |
+| POST | `/api/answer/submit` | Submit answer + adaptive routing to next question |
 | GET | `/api/session/{id}/summary` | Session results summary |
-| GET | `/health` | Health check |
+| GET | `/api/mastery/{userId}` | Mastery constellation graph data |
+| POST | `/api/forms/preview` | Preview Google Form questions |
+| POST | `/api/forms/import` | Import MCQ questions from Google Form |
+| GET | `/api/forms/imports` | List all form imports |
+| DELETE | `/api/forms/imports/{importId}` | Delete a form import |
+| GET/POST | `/api/setup` | Initialize database schema |
 
 ## Project Structure
 
 ```
-├── backend/
+├── backend/                        # FastAPI (local dev with Docker)
 │   ├── app/
-│   │   ├── main.py              # FastAPI endpoints
-│   │   ├── database.py          # SQLAlchemy connection
-│   │   ├── models.py            # ORM models
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── models.py
 │   │   └── analytics/
-│   │       └── routing.py       # Deterministic adaptive routing
-│   ├── schema.sql               # DDL for PostgreSQL
-│   ├── seed_data.sql            # Test data (Arabic)
+│   │       └── routing.py
+│   ├── schema.sql
+│   ├── seed_data.sql
 │   └── requirements.txt
-├── frontend/
-│   ├── src/app/
-│   │   ├── layout.tsx           # RTL Arabic layout
-│   │   ├── page.tsx             # Category selection
-│   │   └── test-lab/page.tsx    # Core test interface
+├── frontend/                       # Next.js (deployed to Vercel)
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── api/               # Serverless API routes
+│   │   │   ├── import/page.tsx    # Google Form importer
+│   │   │   ├── mastery-map/page.tsx
+│   │   │   ├── test-lab/page.tsx
+│   │   │   └── page.tsx           # Category selection
+│   │   └── lib/
+│   │       ├── db.ts              # @vercel/postgres database layer
+│   │       └── form-scraper.ts    # Google Form extraction
 │   ├── package.json
 │   └── tailwind.config.ts
+├── vercel.json                     # Vercel build config
 └── docker-compose.yml
 ```
