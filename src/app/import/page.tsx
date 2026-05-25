@@ -265,10 +265,10 @@ export default function ImportPage() {
   const platformHint = detectPlatformHint(formUrl);
 
   return (
-    <main className="flex flex-col items-center min-h-screen p-8" dir="rtl">
+    <main className="flex flex-col items-center min-h-screen p-4 sm:p-8" dir="rtl">
       <div className="max-w-2xl w-full">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">استيراد الأسئلة</h1>
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold">استيراد الأسئلة</h1>
           <a href="/" className="text-sm text-blue-600 hover:underline">
             ← الرئيسية
           </a>

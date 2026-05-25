@@ -115,7 +115,7 @@ export default function FlashcardsPage() {
               onClick={() => setFlipped(!flipped)}
               className="cursor-pointer select-none"
             >
-              <div className={`bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-8 min-h-[300px] flex flex-col items-center justify-center text-center transition-all ${
+              <div className={`bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-6 sm:p-8 min-h-[240px] sm:min-h-[300px] flex flex-col items-center justify-center text-center transition-all ${
                 flipped ? "bg-indigo-600/20 border-indigo-500/30" : ""
               }`}>
                 <span className="text-xs text-indigo-400 mb-4">{card.category}</span>
@@ -123,10 +123,10 @@ export default function FlashcardsPage() {
                   {flipped ? "الإجابة" : "السؤال"} — {currentIndex + 1}/{cards.length}
                 </p>
                 {!flipped ? (
-                  <p className="text-white text-xl leading-relaxed">{card.question}</p>
+                  <p className="text-white text-lg sm:text-xl leading-relaxed">{card.question}</p>
                 ) : (
                   <div>
-                    <p className="text-green-400 text-2xl font-bold mb-3">{card.answer}</p>
+                    <p className="text-green-400 text-xl sm:text-2xl font-bold mb-3">{card.answer}</p>
                     <p className="text-indigo-300 text-sm">{card.question}</p>
                   </div>
                 )}
