@@ -8,11 +8,13 @@ import { getLeague } from "@/lib/league-system";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: "🏠", label: "الرئيسية" },
-  { href: "/challenge", icon: "⚔️", label: "تحدي الأقران" },
+  { href: "/challenge", icon: "⚔️", label: "تحدي AI" },
+  { href: "/challenge/real", icon: "🎮", label: "تحدي أقران حقيقي" },
   { href: "/exam", icon: "📝", label: "اختبار محاكي" },
   { href: "/practice", icon: "🎯", label: "تدريب" },
   { href: "/review", icon: "🔄", label: "مراجعة الأخطاء" },
   { href: "/leaderboard", icon: "🏅", label: "المتصدرين" },
+  { href: "/rewards", icon: "🎁", label: "الجوائز" },
   { href: "/brain-map", icon: "🧠", label: "الخريطة الدماغية" },
   { href: "/skill-tree", icon: "🌳", label: "شجرة المهارات" },
   { href: "/flashcards", icon: "📇", label: "بطاقات" },

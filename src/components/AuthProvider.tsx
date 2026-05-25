@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { UserData, getUserData, createUser, logoutUser, saveUserData } from "@/lib/user-store";
+import { UserData, getUserData, createUser, logoutUser, getPerformanceAnalytics } from "@/lib/user-store";
+import { syncUserToSupabase, isSupabaseConfigured } from "@/lib/supabase-api";
+import { getLeague } from "@/lib/league-system";
 
 interface AuthContextValue {
   user: UserData | null;
@@ -23,6 +25,28 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+function syncToCloud(data: UserData) {
+  if (!isSupabaseConfigured()) return;
+  const analytics = getPerformanceAnalytics(data);
+  syncUserToSupabase({
+    id: data.profile.id,
+    name: data.profile.name,
+    email: data.profile.email,
+    avatar_color: data.profile.avatar_color,
+    total_points: data.total_points,
+    total_questions: analytics.totalQuestions,
+    total_correct: analytics.totalCorrect,
+    accuracy: analytics.overallAccuracy,
+    streak_current: data.streak.current,
+    streak_longest: data.streak.longest,
+    league: getLeague(data.total_points).id,
+    onboarding_completed: data.onboarding?.completed,
+    learning_style: data.onboarding?.learning_style,
+    experience_level: data.onboarding?.experience_level,
+    target_score: data.onboarding?.target_score,
+  }).catch(() => {});
+}
+
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,11 +55,13 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const data = getUserData();
     setUser(data);
     setLoading(false);
+    if (data) syncToCloud(data);
   }, []);
 
   const login = (name: string, email: string) => {
     const data = createUser(name, email);
     setUser(data);
+    syncToCloud(data);
   };
 
   const logout = () => {
@@ -46,6 +72,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = () => {
     const data = getUserData();
     setUser(data);
+    if (data) syncToCloud(data);
   };
 
   return (
