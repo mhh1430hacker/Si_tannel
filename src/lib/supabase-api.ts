@@ -82,6 +82,33 @@ export async function getUserRank(userId: string): Promise<number> {
   return idx >= 0 ? idx + 1 : 0;
 }
 
+// ===== ADMIN: ALL USERS =====
+
+export interface AdminUserData {
+  id: string;
+  name: string;
+  email: string;
+  avatar_color: string;
+  total_points: number;
+  total_questions: number;
+  total_correct: number;
+  accuracy: number;
+  league: string;
+  streak_current: number;
+  last_active: string;
+  onboarding_completed: boolean;
+}
+
+export async function getAllUsers(): Promise<AdminUserData[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .order("total_points", { ascending: false });
+  if (error || !data) return [];
+  return data;
+}
+
 // ===== CHALLENGES =====
 
 export interface ChallengeRoom {

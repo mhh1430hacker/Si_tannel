@@ -50,7 +50,6 @@ const NAV_GROUPS = [
       { href: "/profile", icon: "👤", label: "الملف الشخصي" },
       { href: "/settings", icon: "⚙️", label: "الإعدادات" },
       { href: "/import", icon: "📥", label: "استيراد أسئلة" },
-      { href: "/admin", icon: "🛡️", label: "لوحة الإدارة" },
     ],
   },
 ];
@@ -66,7 +65,7 @@ const BOTTOM_NAV = [
 export default function Sidebar({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Skip sidebar for admin page and login page
@@ -83,29 +82,29 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar */}
-      <aside className={`fixed md:sticky top-0 h-screen z-50 flex flex-col bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 ${
-        collapsed ? "w-16" : "w-60"
-      } ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        {/* Logo + Close on mobile */}
-        <div className="flex items-center justify-between px-3 py-4 border-b border-white/10">
-          <a href="/dashboard" className="flex items-center gap-2">
-            <span className="text-2xl">🧠</span>
-            {!collapsed && <span className="text-white font-bold">معمل قدرات</span>}
-          </a>
-          <div className="flex items-center gap-2">
-            {!collapsed && <NotificationBell />}
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="md:hidden text-indigo-300 hover:text-white p-1 text-lg"
-            >
-              ✕
-            </button>
+      {/* Sidebar — hidden completely when collapsed on desktop */}
+      {(sidebarOpen || mobileOpen) && (
+        <aside className={`fixed md:sticky top-0 h-screen z-50 flex flex-col w-60 bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}>
+          {/* Logo + Close on mobile */}
+          <div className="flex items-center justify-between px-3 py-4 border-b border-white/10">
+            <a href="/dashboard" className="flex items-center gap-2">
+              <span className="text-2xl">🧠</span>
+              <span className="text-white font-bold">معمل قدرات</span>
+            </a>
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="md:hidden text-indigo-300 hover:text-white p-1 text-lg"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* User + League */}
-        {!collapsed && (
+          {/* User + League */}
           <div className="px-3 py-3 border-b border-white/5">
             <a href="/profile" className="flex items-center gap-2 group">
               <div
@@ -131,58 +130,55 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               </div>
             )}
           </div>
-        )}
 
-        {/* Nav groups */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2">
-          {NAV_GROUPS.map((group) => (
-            <div key={group.title} className="mb-2">
-              {!collapsed && (
+          {/* Nav groups */}
+          <nav className="flex-1 overflow-y-auto py-2 px-2">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title} className="mb-2">
                 <p className="text-indigo-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1">{group.title}</p>
-              )}
-              {collapsed && <div className="border-t border-white/5 my-1" />}
-              <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
-                  return (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        active
-                          ? "bg-indigo-600/30 text-white border border-indigo-500/20"
-                          : "text-indigo-300 hover:bg-white/5 hover:text-white border border-transparent"
-                      }`}
-                    >
-                      <span className="text-base shrink-0">{item.icon}</span>
-                      {!collapsed && <span className="text-xs">{item.label}</span>}
-                    </a>
-                  );
-                })}
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                          active
+                            ? "bg-indigo-600/30 text-white border border-indigo-500/20"
+                            : "text-indigo-300 hover:bg-white/5 hover:text-white border border-transparent"
+                        }`}
+                      >
+                        <span className="text-base shrink-0">{item.icon}</span>
+                        <span className="text-xs">{item.label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </nav>
+            ))}
+          </nav>
 
-        {/* Footer */}
-        <div className="border-t border-white/10 p-2 space-y-0.5">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-indigo-400 hover:text-white text-sm rounded-lg hover:bg-white/5 transition-all"
-          >
-            <span className="text-base">{collapsed ? "→" : "←"}</span>
-            {!collapsed && <span className="text-xs">طي القائمة</span>}
-          </button>
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:text-red-300 text-sm rounded-lg hover:bg-red-600/10 transition-all"
-          >
-            <span className="text-base">🚪</span>
-            {!collapsed && <span className="text-xs">تسجيل خروج</span>}
-          </button>
-        </div>
-      </aside>
+          {/* Footer */}
+          <div className="border-t border-white/10 p-2 space-y-0.5">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="hidden md:flex w-full items-center gap-2.5 px-3 py-2 text-indigo-400 hover:text-white text-sm rounded-lg hover:bg-white/5 transition-all"
+            >
+              <span className="text-base">←</span>
+              <span className="text-xs">إخفاء القائمة</span>
+            </button>
+            <button
+              onClick={logout}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:text-red-300 text-sm rounded-lg hover:bg-red-600/10 transition-all"
+            >
+              <span className="text-base">🚪</span>
+              <span className="text-xs">تسجيل خروج</span>
+            </button>
+          </div>
+        </aside>
+      )}
 
       {/* Main content */}
       <div className="flex-1 min-w-0">
@@ -195,6 +191,18 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           </a>
           <NotificationBell />
         </header>
+
+        {/* Desktop: show sidebar toggle when sidebar is hidden */}
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="hidden md:flex fixed top-4 right-4 z-50 items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-indigo-300 hover:text-white hover:bg-black/80 transition-all text-sm"
+          >
+            <span>☰</span>
+            <span className="text-xs">القائمة</span>
+          </button>
+        )}
+
         <main className="min-h-screen pb-20 md:pb-0">
           {children}
         </main>
