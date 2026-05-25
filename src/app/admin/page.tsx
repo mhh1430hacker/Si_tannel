@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { QUDRAT_SECTIONS, QudratQuestion } from "@/data/qudrat-questions";
+import { getAllUsers, AdminUserData } from "@/lib/supabase-api";
 
 // Admin credentials (hardcoded for now — production should use env vars)
 const ADMIN_EMAIL = "admin@ainex.com";
@@ -104,12 +105,45 @@ export default function AdminPage() {
     if (saved === "true") setIsAdmin(true);
   }, []);
 
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [supabaseConnected, setSupabaseConnected] = useState(false);
+
   useEffect(() => {
     if (isAdmin) {
       setStats(getStats());
+      loadAllUsers();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
+
+  async function loadAllUsers() {
+    setLoadingUsers(true);
+    const supabaseUsers = await getAllUsers();
+    if (supabaseUsers.length > 0) {
+      setSupabaseConnected(true);
+      const mapped: AdminUser[] = supabaseUsers.map((u: AdminUserData) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        total_points: u.total_points,
+        total_questions: u.total_questions,
+        accuracy: Math.round(u.accuracy),
+        league: u.league || "bronze",
+        last_active: u.last_active || "",
+        streak: u.streak_current,
+      }));
+      setUsers(mapped);
+      setStats((prev) => ({
+        ...prev,
+        totalUsers: mapped.length,
+        avgAccuracy: mapped.length > 0 ? Math.round(mapped.reduce((s, u) => s + u.accuracy, 0) / mapped.length) : 0,
+        activeToday: mapped.filter(u => u.last_active && new Date(u.last_active).toDateString() === new Date().toDateString()).length,
+      }));
+    } else {
       setUsers(getStoredUsers());
     }
-  }, [isAdmin]);
+    setLoadingUsers(false);
+  }
 
   function handleAdminLogin() {
     if (loginEmail === ADMIN_EMAIL && loginPass === ADMIN_PASS) {
@@ -321,13 +355,30 @@ export default function AdminPage() {
           {/* USERS TAB */}
           {tab === "users" && (
             <div>
-              <h2 className="text-xl font-bold text-white mb-6">👥 إدارة المستخدمين</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">👥 إدارة المستخدمين</h2>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${supabaseConnected ? "bg-green-400" : "bg-yellow-400"}`} />
+                  <span className="text-xs text-indigo-400">{supabaseConnected ? "Supabase متصل" : "بيانات محلية"}</span>
+                  <button onClick={loadAllUsers} className="text-indigo-400 hover:text-white text-xs bg-white/10 px-2 py-1 rounded-lg">تحديث</button>
+                </div>
+              </div>
 
-              {users.length === 0 ? (
+              {loadingUsers ? (
+                <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
+                  <div className="animate-pulse text-indigo-300">جارٍ تحميل المستخدمين...</div>
+                </div>
+              ) : users.length === 0 ? (
                 <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
                   <span className="text-5xl block mb-4">👥</span>
                   <h3 className="text-white font-bold text-lg mb-2">لا يوجد مستخدمون بعد</h3>
-                  <p className="text-indigo-400 text-sm">المستخدمون المسجلون سيظهرون هنا</p>
+                  <p className="text-indigo-400 text-sm mb-4">المستخدمون المسجلون سيظهرون هنا</p>
+                  {!supabaseConnected && (
+                    <div className="bg-yellow-600/10 border border-yellow-500/20 rounded-xl p-4 text-right">
+                      <p className="text-yellow-300 text-sm font-bold mb-1">تنبيه: Supabase غير مربوط</p>
+                      <p className="text-yellow-400/70 text-xs">لعرض المستخدمين يجب ربط قاعدة البيانات وتشغيل SQL Schema. راجع التعليمات أدناه.</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-3">
