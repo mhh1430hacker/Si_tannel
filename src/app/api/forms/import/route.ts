@@ -1,8 +1,14 @@
-import { sql } from "@/lib/db";
+import { sql, hasDatabase } from "@/lib/db";
 import { scrapeGoogleForm, MCQ_COMPATIBLE_TYPES } from "@/lib/form-scraper";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
+  if (!hasDatabase) {
+    return NextResponse.json(
+      { detail: "استيراد Google Forms يتطلب قاعدة بيانات. أضف Vercel Postgres من إعدادات المشروع، أو استخدم أسئلة القدرات المدمجة." },
+      { status: 503 }
+    );
+  }
   try {
     const body = await request.json();
     const { form_url, skill_category, difficulty = "متوسط", correct_answers } = body;

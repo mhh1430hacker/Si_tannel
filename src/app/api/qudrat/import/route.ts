@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql, hasDatabase } from "@/lib/db";
 import { QUDRAT_SECTIONS } from "@/data/qudrat-questions";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,12 +14,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ detail: "القسم غير موجود" }, { status: 404 });
     }
 
+    // No database — questions are served from memory automatically
+    if (!hasDatabase) {
+      return NextResponse.json({
+        section_name: section.section_name,
+        total_available: section.questions.length,
+        imported: section.questions.length,
+        skipped_duplicates: 0,
+        mode: "memory",
+        message: "الأسئلة متاحة مباشرة بدون قاعدة بيانات — يمكنك بدء الاختبار الآن!",
+      });
+    }
+
     const skillCategory = section.section_name;
     let imported = 0;
     let skipped = 0;
 
     for (const q of section.questions) {
-      // Check if question already exists (by content + category)
       const existing = await sql`
         SELECT id FROM questions
         WHERE content = ${q.text} AND skill_category = ${skillCategory}
@@ -51,6 +62,7 @@ export async function POST(request: NextRequest) {
       total_available: section.questions.length,
       imported,
       skipped_duplicates: skipped,
+      mode: "database",
     });
   } catch (error: any) {
     return NextResponse.json({ detail: error.message || "فشل في الاستيراد" }, { status: 500 });

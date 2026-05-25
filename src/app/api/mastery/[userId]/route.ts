@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db";
+import { sql, hasDatabase } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -6,6 +6,9 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   const { userId } = params;
+  if (!hasDatabase) {
+    return NextResponse.json({ user_id: userId, nodes: [], edges: [] });
+  }
   try {
     const nodes = await sql`
       SELECT id, skill_category, sub_skill, mastery_level, total_attempts, correct_attempts
