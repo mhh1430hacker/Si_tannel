@@ -7,6 +7,7 @@ import { getPerformanceAnalytics, getSmartRecommendations } from "@/lib/user-sto
 import { analyzeUserPatterns, getDailyMotivation } from "@/lib/ai-tutor";
 import type { AiInsight } from "@/lib/ai-tutor";
 import { getLeague, getLeagueProgress, getNextLeague } from "@/lib/league-system";
+import DonationCTA from "@/components/DonationCTA";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -272,6 +273,11 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Subtle donation */}
+        <div className="mt-4 text-center">
+          <DonationCTA variant="inline" />
+        </div>
       </main>
     </div>
   );

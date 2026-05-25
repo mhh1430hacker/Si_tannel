@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/Notifications";
+import DonationCTA from "@/components/DonationCTA";
 import { getLeague, getLeagueProgress, getNextLeague } from "@/lib/league-system";
 
 const NAV_GROUPS = [
@@ -168,6 +169,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
 
           {/* Footer */}
           <div className="border-t border-white/10 p-2 space-y-0.5">
+            <DonationCTA variant="sidebar" />
             <button
               onClick={() => setSidebarVisible(false)}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-indigo-400 hover:text-white text-sm rounded-lg hover:bg-white/5 transition-all"
@@ -251,8 +253,9 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          {/* Logout */}
-          <div className="border-t border-white/10 p-2">
+          {/* Footer */}
+          <div className="border-t border-white/10 p-2 space-y-0.5">
+            <DonationCTA variant="sidebar" />
             <button
               onClick={logout}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:text-red-300 text-sm rounded-lg hover:bg-red-600/10 transition-all"

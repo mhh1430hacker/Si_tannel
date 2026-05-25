@@ -156,6 +156,9 @@ export default function Home() {
             <span className="text-xl">🧠</span>
             <span className="text-indigo-400 text-sm">معمل قدرات — Ainex Qudrat Lab</span>
           </div>
+          <a href="https://buymeacoffee.com/khalas" target="_blank" rel="noopener noreferrer" className="text-amber-400/60 hover:text-amber-300 text-xs transition-colors">
+            ☕ ادعم المطور
+          </a>
           <p className="text-indigo-500 text-xs">جميع الحقوق محفوظة</p>
         </div>
       </footer>
