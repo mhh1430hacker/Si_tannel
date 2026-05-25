@@ -22,6 +22,7 @@ const NAV_GROUPS = [
       { href: "/review", icon: "🔄", label: "مراجعة الأخطاء" },
       { href: "/flashcards", icon: "📇", label: "بطاقات تعليمية" },
       { href: "/study-plan", icon: "📅", label: "خطة دراسية" },
+      { href: "/test-lab", icon: "🧪", label: "معمل الاختبار" },
     ],
   },
   {
@@ -40,6 +41,7 @@ const NAV_GROUPS = [
       { href: "/report", icon: "📋", label: "تقرير شامل" },
       { href: "/brain-map", icon: "🧠", label: "الخريطة الدماغية" },
       { href: "/skill-tree", icon: "🌳", label: "شجرة المهارات" },
+      { href: "/mastery-map", icon: "🗺️", label: "خريطة الإتقان" },
     ],
   },
   {

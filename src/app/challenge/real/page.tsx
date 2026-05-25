@@ -39,10 +39,13 @@ export default function RealChallengePage() {
   }, [loading, user, router]);
 
   useEffect(() => {
+    const searchTimer = searchTimerRef.current;
+    const channel = channelRef.current;
+    const aiTimer = aiTimerRef.current;
     return () => {
-      if (searchTimerRef.current) clearInterval(searchTimerRef.current);
-      if (channelRef.current) channelRef.current.unsubscribe();
-      if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
+      if (searchTimer) clearInterval(searchTimer);
+      if (channel) channel.unsubscribe();
+      if (aiTimer) clearTimeout(aiTimer);
     };
   }, []);
 
@@ -137,7 +140,7 @@ export default function RealChallengePage() {
         }
       });
     }
-  }, [user, section, router]);
+  }, [user, section]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function startBattle(roomId: string, pNum: 1 | 2) {
     setPhase("countdown");

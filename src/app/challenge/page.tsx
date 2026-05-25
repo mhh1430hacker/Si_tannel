@@ -142,6 +142,16 @@ export default function ChallengePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (phase === "result" && opponent) {
+      const userWon = battle.userScore > battle.opponentScore;
+      if (userWon) {
+        launchConfetti(4000);
+        playChallengeWinSound();
+      }
+    }
+  }, [phase, opponent, battle.userScore, battle.opponentScore]);
+
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-indigo-950"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;
   }
@@ -227,14 +237,6 @@ export default function ChallengePage() {
     const draw = battle.userScore === battle.opponentScore;
     const userAvgTime = battle.userTimes.length > 0 ? Math.round(battle.userTimes.reduce((s, t) => s + t, 0) / battle.userTimes.length) : 0;
     const oppAvgTime = battle.opponentTimes.length > 0 ? Math.round(battle.opponentTimes.reduce((s, t) => s + t, 0) / battle.opponentTimes.length) : 0;
-
-    // Trigger effects
-    useEffect(() => {
-      if (userWon) {
-        launchConfetti(4000);
-        playChallengeWinSound();
-      }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
