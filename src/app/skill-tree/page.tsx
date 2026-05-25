@@ -125,7 +125,7 @@ export default function SkillTreePage() {
                     ? `${c.bg} ${c.border} shadow-lg ${c.glow}`
                     : "bg-white/5 border-white/5 opacity-50"
                 }`}
-                style={{ marginRight: skill.tier * 20 + "px" }}
+                style={{ marginRight: `min(${skill.tier * 20}px, ${skill.tier * 4}vw)` }}
               >
                 <div className="flex items-center gap-3">
                   <span className={`text-3xl ${isUnlocked ? "" : "grayscale"}`}>{skill.icon}</span>

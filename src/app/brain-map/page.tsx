@@ -205,9 +205,31 @@ export default function BrainMapPage() {
     }
     canvas.addEventListener("mousemove", handleMouseMove);
 
+    function handleTouch(e: TouchEvent) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      if (!touch) return;
+      const mx = (touch.clientX - rect.left) / rect.width;
+      const my = (touch.clientY - rect.top) / rect.height;
+      let found: string | null = null;
+      for (const node of nodes) {
+        const dist = Math.sqrt((mx - node.x) ** 2 + (my - node.y) ** 2);
+        if (dist < 0.06) {
+          found = node.id;
+          break;
+        }
+      }
+      setHoveredNode(found);
+    }
+    canvas.addEventListener("touchmove", handleTouch, { passive: false });
+    canvas.addEventListener("touchstart", handleTouch, { passive: false });
+
     return () => {
       cancelAnimationFrame(animRef.current);
       canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("touchmove", handleTouch);
+      canvas.removeEventListener("touchstart", handleTouch);
     };
   }, [user, hoveredNode, loading]);
 
@@ -231,7 +253,7 @@ export default function BrainMapPage() {
         </p>
 
         {/* Canvas */}
-        <div className="bg-black/30 rounded-3xl border border-white/10 overflow-hidden" style={{ height: "500px" }}>
+        <div className="bg-black/30 rounded-2xl sm:rounded-3xl border border-white/10 overflow-hidden h-[300px] sm:h-[400px] md:h-[500px]">
           <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" />
         </div>
 

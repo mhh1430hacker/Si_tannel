@@ -50,8 +50,17 @@ const NAV_GROUPS = [
       { href: "/profile", icon: "👤", label: "الملف الشخصي" },
       { href: "/settings", icon: "⚙️", label: "الإعدادات" },
       { href: "/import", icon: "📥", label: "استيراد أسئلة" },
+      { href: "/admin", icon: "🛡️", label: "لوحة الإدارة" },
     ],
   },
+];
+
+const BOTTOM_NAV = [
+  { href: "/dashboard", icon: "🏠", label: "الرئيسية" },
+  { href: "/exam", icon: "📝", label: "اختبار" },
+  { href: "/challenge", icon: "⚔️", label: "تحدي" },
+  { href: "/analytics", icon: "📊", label: "تحليل" },
+  { href: "/profile", icon: "👤", label: "حسابي" },
 ];
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
@@ -60,7 +69,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (!user) return <>{children}</>;
+  // Skip sidebar for admin page and login page
+  if (!user || pathname === "/admin") return <>{children}</>;
 
   const league = getLeague(user.total_points);
   const nextLeague = getNextLeague(user.total_points);
@@ -77,13 +87,21 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       <aside className={`fixed md:sticky top-0 h-screen z-50 flex flex-col bg-black/40 backdrop-blur-xl border-l border-white/10 transition-all duration-300 ${
         collapsed ? "w-16" : "w-60"
       } ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
-        {/* Logo */}
+        {/* Logo + Close on mobile */}
         <div className="flex items-center justify-between px-3 py-4 border-b border-white/10">
           <a href="/dashboard" className="flex items-center gap-2">
             <span className="text-2xl">🧠</span>
             {!collapsed && <span className="text-white font-bold">معمل قدرات</span>}
           </a>
-          {!collapsed && <NotificationBell />}
+          <div className="flex items-center gap-2">
+            {!collapsed && <NotificationBell />}
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden text-indigo-300 hover:text-white p-1 text-lg"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* User + League */}
@@ -131,7 +149,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
                         active
                           ? "bg-indigo-600/30 text-white border border-indigo-500/20"
                           : "text-indigo-300 hover:bg-white/5 hover:text-white border border-transparent"
@@ -158,7 +176,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           </button>
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-red-400 hover:text-red-300 text-sm rounded-lg hover:bg-red-600/10 transition-all"
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 text-red-400 hover:text-red-300 text-sm rounded-lg hover:bg-red-600/10 transition-all"
           >
             <span className="text-base">🚪</span>
             {!collapsed && <span className="text-xs">تسجيل خروج</span>}
@@ -170,16 +188,39 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
       <div className="flex-1 min-w-0">
         {/* Mobile header */}
         <header className="md:hidden bg-black/30 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-          <button onClick={() => setMobileOpen(true)} className="text-white text-xl p-1">☰</button>
+          <button onClick={() => setMobileOpen(true)} className="text-white text-xl p-2 -m-1">☰</button>
           <a href="/dashboard" className="text-white font-bold flex items-center gap-2">
             <span>🧠</span>
-            <span>معمل قدرات</span>
+            <span className="text-sm">معمل قدرات</span>
           </a>
           <NotificationBell />
         </header>
-        <main className="min-h-screen">
+        <main className="min-h-screen pb-20 md:pb-0">
           {children}
         </main>
+
+        {/* Mobile bottom navigation */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 z-40 pb-safe">
+          <div className="flex items-center justify-around px-1 py-1">
+            {BOTTOM_NAV.map((item) => {
+              const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all min-w-0 ${
+                    active
+                      ? "text-indigo-400 bg-indigo-600/20"
+                      : "text-indigo-400/60 hover:text-white"
+                  }`}
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-[9px] font-medium truncate">{item.label}</span>
+                </a>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

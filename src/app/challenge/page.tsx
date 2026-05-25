@@ -209,22 +209,22 @@ export default function ChallengePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="flex items-center justify-center gap-12 mb-12">
+          <div className="flex items-center justify-center gap-6 sm:gap-12 mb-8 sm:mb-12 px-4">
             <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-indigo-600/30 flex items-center justify-center text-3xl mb-2 border-2 border-indigo-500">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-600/30 flex items-center justify-center text-2xl sm:text-3xl mb-2 border-2 border-indigo-500">
                 {user.profile.name.charAt(0)}
               </div>
-              <p className="text-white font-bold">{user.profile.name}</p>
+              <p className="text-white font-bold text-sm sm:text-base">{user.profile.name}</p>
             </div>
-            <span className="text-3xl font-bold text-red-400 animate-pulse">VS</span>
+            <span className="text-2xl sm:text-3xl font-bold text-red-400 animate-pulse shrink-0">VS</span>
             <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-red-600/30 flex items-center justify-center text-4xl mb-2 border-2 border-red-500">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-600/30 flex items-center justify-center text-3xl sm:text-4xl mb-2 border-2 border-red-500">
                 {opponent?.avatar}
               </div>
-              <p className="text-white font-bold">{opponent?.name}</p>
+              <p className="text-white font-bold text-sm sm:text-base">{opponent?.name}</p>
             </div>
           </div>
-          <div className="text-8xl font-bold text-white animate-bounce">{countdown}</div>
+          <div className="text-6xl sm:text-8xl font-bold text-white animate-bounce">{countdown}</div>
           <p className="text-indigo-300 mt-4">استعد...</p>
         </div>
       </div>
@@ -332,8 +332,8 @@ export default function ChallengePage() {
         )}
 
         {/* Question */}
-        <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-6 mb-4">
-          <p className="text-white text-lg leading-relaxed">{q.text}</p>
+        <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-4 sm:p-6 mb-4">
+          <p className="text-white text-base sm:text-lg leading-relaxed">{q.text}</p>
         </div>
 
         {/* Choices */}
