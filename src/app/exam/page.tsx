@@ -204,13 +204,16 @@ export default function ExamPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
         <div className="max-w-2xl mx-auto pt-8">
-          <h1 className="text-2xl font-bold text-white text-center mb-8">📋 نتيجة الاختبار المحاكي</h1>
+          <h1 className="text-2xl font-bold text-white text-center mb-2 animate-fade-in">📋 نتيجة الاختبار المحاكي</h1>
+          <p className="text-indigo-300 text-center text-sm mb-8 animate-fade-in">
+            {accuracy >= 80 ? "أداء رائع! أنت من أفضل الطلاب 🌟" : accuracy >= 60 ? "أداء جيد! بتدريب إضافي بسيط ستصل للتميّز 💪" : accuracy >= 40 ? "بداية موفقة! أغلب الطلاب يحتاجون عدة محاولات للتحسّن 🚀" : "كل خبير كان مبتدئاً يوماً! استمر وستلاحظ الفرق ✨"}
+          </p>
 
           {/* Score circle */}
-          <div className="flex justify-center mb-8">
-            <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center ${accuracy >= 70 ? "border-green-500 bg-green-600/20" : accuracy >= 50 ? "border-yellow-500 bg-yellow-600/20" : "border-red-500 bg-red-600/20"}`}>
+          <div className="flex justify-center mb-8 animate-scale-in">
+            <div className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center ${accuracy >= 70 ? "border-green-500 bg-green-600/20" : accuracy >= 50 ? "border-yellow-500 bg-yellow-600/20" : "border-amber-500 bg-amber-600/20"}`}>
               <span className="text-3xl font-bold text-white">{accuracy}٪</span>
-              <span className="text-xs text-indigo-300">الدقة</span>
+              <span className="text-xs text-indigo-200">الدقة</span>
             </div>
           </div>
 
@@ -236,18 +239,21 @@ export default function ExamPage() {
               {answers.map((a, i) => {
                 const q = questions[a.questionIndex];
                 return (
-                  <div key={i} className={`rounded-lg p-4 border ${a.isCorrect ? "bg-green-600/10 border-green-500/20" : "bg-red-600/10 border-red-500/20"}`}>
+                  <div key={i} className={`rounded-lg p-4 border transition-all ${a.isCorrect ? "bg-green-600/10 border-green-500/20" : "bg-amber-600/5 border-amber-500/20"}`}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <p className="text-white text-sm flex-1">{i + 1}. {q.text}</p>
-                      <span className="text-xs shrink-0">{a.isCorrect ? "✓" : "✗"}</span>
+                      <span className={`text-xs shrink-0 ${a.isCorrect ? "text-green-400" : "text-amber-400"}`}>{a.isCorrect ? "✓" : "✗"}</span>
                     </div>
                     <div className="text-xs space-y-1">
                       {a.selectedChoice !== null && !a.isCorrect && (
-                        <p className="text-red-300">إجابتك: {q.choices[a.selectedChoice]}</p>
+                        <p className="text-amber-300">إجابتك: {q.choices[a.selectedChoice]}</p>
                       )}
                       {a.selectedChoice === null && <p className="text-yellow-300">تم التخطي</p>}
                       <p className="text-green-300">الصحيحة: {q.choices[q.correct_index]}</p>
-                      {q.explanation && <p className="text-indigo-300 mt-1">💡 {q.explanation}</p>}
+                      {q.explanation && <p className="text-indigo-200 mt-1">💡 {q.explanation}</p>}
+                      {!a.isCorrect && !q.explanation && (
+                        <p className="text-indigo-300/60 mt-1">💡 هذا السؤال يخطئ فيه الكثير من الطلاب — راجعه وستتقنه</p>
+                      )}
                     </div>
                   </div>
                 );

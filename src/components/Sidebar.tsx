@@ -134,7 +134,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                 <div className="w-full bg-white/10 rounded-full h-1.5">
                   <div className="h-1.5 rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: league.color }} />
                 </div>
-                <p className="text-indigo-500 text-[9px] mt-0.5">{user.total_points} / {nextLeague.minPoints} نقطة</p>
+                <p className="text-indigo-400 text-[9px] mt-0.5">{user.total_points} / {nextLeague.minPoints} نقطة</p>
               </div>
             )}
           </div>
@@ -143,7 +143,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           <nav className="flex-1 overflow-y-auto py-2 px-2">
             {NAV_GROUPS.map((group) => (
               <div key={group.title} className="mb-2">
-                <p className="text-indigo-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1">{group.title}</p>
+                <p className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider px-3 py-1">{group.title}</p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
@@ -154,7 +154,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                         className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
                           active
                             ? "bg-indigo-600/30 text-white border border-indigo-500/20"
-                            : "text-indigo-300 hover:bg-white/5 hover:text-white border border-transparent"
+                            : "text-indigo-200 hover:bg-white/5 hover:text-white border border-transparent"
                         }`}
                       >
                         <span className="text-base shrink-0">{item.icon}</span>
@@ -228,7 +228,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
           <nav className="flex-1 overflow-y-auto py-2 px-2">
             {NAV_GROUPS.map((group) => (
               <div key={group.title} className="mb-2">
-                <p className="text-indigo-500 text-[10px] font-bold uppercase tracking-wider px-3 py-1">{group.title}</p>
+                <p className="text-indigo-400 text-[10px] font-bold uppercase tracking-wider px-3 py-1">{group.title}</p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
                     const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href + "/"));
@@ -240,7 +240,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                         className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all ${
                           active
                             ? "bg-indigo-600/30 text-white border border-indigo-500/20"
-                            : "text-indigo-300 hover:bg-white/5 hover:text-white border border-transparent"
+                            : "text-indigo-200 hover:bg-white/5 hover:text-white border border-transparent"
                         }`}
                       >
                         <span className="text-base shrink-0">{item.icon}</span>
@@ -305,8 +305,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl transition-all min-w-0 ${
                     active
-                      ? "text-indigo-400 bg-indigo-600/20"
-                      : "text-indigo-400/60 hover:text-white"
+                      ? "text-indigo-300 bg-indigo-600/20"
+                      : "text-indigo-300/60 hover:text-white"
                   }`}
                 >
                   <span className="text-lg">{item.icon}</span>

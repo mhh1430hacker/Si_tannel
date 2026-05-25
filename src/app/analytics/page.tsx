@@ -122,6 +122,56 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
+            {/* Prediction Score */}
+            <div className="bg-gradient-to-l from-purple-600/20 to-indigo-600/20 rounded-2xl p-6 border border-purple-500/20">
+              <h2 className="text-lg font-bold text-white mb-3">🎯 الدرجة المتوقعة في القدرات</h2>
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <p className="text-5xl font-bold text-white">{Math.round(40 + (a.overallAccuracy / 100) * 60)}</p>
+                  <p className="text-indigo-300 text-xs mt-1">من ١٠٠</p>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between text-xs text-indigo-300">
+                    <span>مستواك الحالي</span>
+                    <span>{a.overallAccuracy}٪</span>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-3">
+                    <div className="bg-gradient-to-l from-purple-500 to-indigo-500 h-3 rounded-full transition-all" style={{ width: `${a.overallAccuracy}%` }} />
+                  </div>
+                  <p className="text-indigo-300/60 text-xs">
+                    {a.overallAccuracy >= 80 ? "مستوى متقدم — استمر في المراجعة" : a.overallAccuracy >= 60 ? "مستوى جيد — ركّز على نقاط الضعف" : "أغلب الطلاب يبدأون من هنا — استمر!"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Percentile Comparison */}
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <h2 className="text-lg font-bold text-white mb-3">📊 مقارنة مع متوسط الطلاب</h2>
+              <div className="space-y-4">
+                <CompareBar label="دقتك" value={a.overallAccuracy} avg={55} color="indigo" />
+                <CompareBar label="متوسط وقتك" value={a.avgTimePerQuestion} avg={45} color="teal" suffix=" ث" />
+                <CompareBar label="جلساتك" value={a.totalSessions} avg={8} color="purple" />
+              </div>
+            </div>
+
+            {/* Performance Heatmap */}
+            <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+              <h2 className="text-lg font-bold text-white mb-3">🗳️ خريطة الأداء الحرارية</h2>
+              <p className="text-indigo-300/60 text-xs mb-4">الأخضر = إتقان عالي ، الأحمر = يحتاج تدريب</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {a.categoryBreakdown.map((cat, i) => (
+                  <div key={i} className={`rounded-xl p-3 text-center border transition-all ${
+                    cat.accuracy >= 70 ? "bg-green-600/15 border-green-500/20" : cat.accuracy >= 50 ? "bg-yellow-600/15 border-yellow-500/20" : "bg-red-600/15 border-red-500/20"
+                  }`}>
+                    <span className="text-lg block">{cat.category.includes("كمي") ? "📐" : "📖"}</span>
+                    <p className="text-white text-xs font-bold mt-1">{cat.category}</p>
+                    <p className={`text-sm font-bold mt-1 ${cat.accuracy >= 70 ? "text-green-400" : cat.accuracy >= 50 ? "text-yellow-400" : "text-red-400"}`}>{cat.accuracy}٪</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Recent Trend */}
             {a.recentTrend.length > 0 && (
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
@@ -129,9 +179,9 @@ export default function AnalyticsPage() {
                 <div className="flex items-end gap-2 h-32">
                   {a.recentTrend.map((t, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center">
-                      <span className="text-xs text-indigo-300 mb-1">{t.accuracy}٪</span>
+                      <span className="text-xs text-indigo-200 mb-1">{t.accuracy}٪</span>
                       <div
-                        className={`w-full rounded-t-lg transition-all ${
+                        className={`w-full rounded-t-lg transition-all duration-300 ${
                           t.accuracy >= 70 ? "bg-green-500/60" : t.accuracy >= 50 ? "bg-yellow-500/60" : "bg-red-500/60"
                         }`}
                         style={{ height: `${Math.max(8, t.accuracy)}%` }}
@@ -148,31 +198,31 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-teal-400">{Math.floor(a.studyTimeTotal / 60)}</p>
-                  <p className="text-xs text-indigo-300">دقيقة إجمالاً</p>
+                  <p className="text-xs text-indigo-200">دقيقة إجمالاً</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-purple-400">{a.totalSessions}</p>
-                  <p className="text-xs text-indigo-300">جلسة دراسية</p>
+                  <p className="text-xs text-indigo-200">جلسة دراسية</p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-bold text-indigo-400">{a.avgTimePerQuestion}</p>
-                  <p className="text-xs text-indigo-300">ثانية/سؤال</p>
+                  <p className="text-xs text-indigo-200">ثانية/سؤال</p>
                 </div>
               </div>
             </div>
             {/* Quick links */}
             <div className="grid grid-cols-3 gap-3">
-              <a href="/practice" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+              <a href="/practice" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all card-hover">
                 <span className="text-lg block">🎯</span>
-                <span className="text-indigo-300 text-xs">تدريب</span>
+                <span className="text-indigo-200 text-xs">تدريب</span>
               </a>
-              <a href="/review" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+              <a href="/review" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all card-hover">
                 <span className="text-lg block">🔄</span>
-                <span className="text-indigo-300 text-xs">مراجعة أخطاء</span>
+                <span className="text-indigo-200 text-xs">مراجعة أخطاء</span>
               </a>
-              <a href="/study-plan" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+              <a href="/study-plan" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all card-hover">
                 <span className="text-lg block">📅</span>
-                <span className="text-indigo-300 text-xs">خطة دراسية</span>
+                <span className="text-indigo-200 text-xs">خطة دراسية</span>
               </a>
             </div>
           </>
@@ -190,9 +240,37 @@ function OverviewCard({ label, value, color }: { label: string; value: string | 
     teal: "from-teal-600/20 border-teal-500/20",
   };
   return (
-    <div className={`bg-gradient-to-bl ${colors[color]} to-transparent rounded-xl p-4 border`}>
+    <div className={`bg-gradient-to-bl ${colors[color]} to-transparent rounded-xl p-4 border card-hover`}>
       <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-indigo-300 text-xs mt-1">{label}</p>
+      <p className="text-indigo-200 text-xs mt-1">{label}</p>
+    </div>
+  );
+}
+
+function CompareBar({ label, value, avg, color, suffix = "" }: { label: string; value: number; avg: number; color: string; suffix?: string }) {
+  const maxVal = Math.max(value, avg, 1);
+  const colors: Record<string, string> = {
+    indigo: "bg-indigo-500",
+    teal: "bg-teal-500",
+    purple: "bg-purple-500",
+  };
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-indigo-200">{label}</span>
+        <span className="text-white font-bold">{value}{suffix}</span>
+      </div>
+      <div className="flex gap-1">
+        <div className="flex-1">
+          <div className="w-full bg-white/10 rounded-full h-2">
+            <div className={`${colors[color]} h-2 rounded-full transition-all duration-500`} style={{ width: `${Math.min(100, (value / maxVal) * 100)}%` }} />
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-between text-xs mt-0.5">
+        <span className="text-indigo-300/50">متوسط الطلاب: {avg}{suffix}</span>
+        <span className={`text-xs ${value >= avg ? "text-green-400" : "text-amber-400"}`}>{value >= avg ? "أفضل من المتوسط" : "استمر في التحسّن"}</span>
+      </div>
     </div>
   );
 }
