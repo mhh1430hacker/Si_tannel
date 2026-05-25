@@ -90,7 +90,7 @@ export default function BrainMapPage() {
       const strength = getStrength(n.id);
       const hue = n.category === "kamy" ? 240 : n.category === "lafzy" ? 280 : 200;
       const lightness = 40 + strength * 30;
-      return { ...n, strength, color: `hsl(${hue}, 70%, ${lightness}%)` };
+      return { ...n, strength, color: `${hue}, 70%, ${lightness}%` };
     });
 
     function resize() {
@@ -150,8 +150,8 @@ export default function BrainMapPage() {
 
         // Glow
         const gradient = ctx!.createRadialGradient(x, y, 0, x, y, r * pulse * (isHovered ? 1.5 : 1.2));
-        gradient.addColorStop(0, node.color);
-        gradient.addColorStop(0.7, node.color + "60");
+        gradient.addColorStop(0, `hsl(${node.color})`);
+        gradient.addColorStop(0.7, `hsla(${node.color}, 0.38)`);
         gradient.addColorStop(1, "transparent");
         ctx!.fillStyle = gradient;
         ctx!.beginPath();
@@ -161,7 +161,7 @@ export default function BrainMapPage() {
         // Core circle
         ctx!.beginPath();
         ctx!.arc(x, y, r * pulse * 0.6, 0, Math.PI * 2);
-        ctx!.fillStyle = node.color;
+        ctx!.fillStyle = `hsl(${node.color})`;
         ctx!.fill();
         ctx!.strokeStyle = `rgba(255,255,255,${node.strength * 0.5})`;
         ctx!.lineWidth = 1;
