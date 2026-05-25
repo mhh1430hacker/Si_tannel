@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { QUDRAT_SECTIONS } from "@/data/qudrat-questions";
 import type { QudratQuestion } from "@/data/qudrat-questions";
 import { addSessionRecord } from "@/lib/user-store";
+import DonationCTA from "@/components/DonationCTA";
 
 type ExamPhase = "setup" | "running" | "review";
 
@@ -254,7 +255,7 @@ export default function ExamPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center mb-6">
             <button onClick={() => { setPhase("setup"); setAnswers([]); }} className="px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
               📝 اختبار جديد
             </button>
@@ -268,6 +269,8 @@ export default function ExamPage() {
               ⚔️ تحدي
             </a>
           </div>
+
+          <DonationCTA variant="banner" />
         </div>
       </div>
     );

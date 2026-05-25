@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { getPerformanceAnalytics } from "@/lib/user-store";
 import { getLeague, getLeagueProgress, getNextLeague } from "@/lib/league-system";
+import DonationCTA from "@/components/DonationCTA";
 
 export default function ProfilePage() {
   const { user, loading } = useAuth();
@@ -224,6 +225,8 @@ export default function ProfilePage() {
             <span className="text-indigo-300 text-xs">الخريطة الدماغية</span>
           </a>
         </div>
+
+        <DonationCTA variant="card" />
       </div>
     </div>
   );
