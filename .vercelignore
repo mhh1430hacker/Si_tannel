@@ -1,15 +1,12 @@
 backend/
 docker-compose.yml
-README.md
 *.sql
 *.py
 .git/
 .vscode/
 .idea/
 node_modules/
-.venv/
-venv/
-*.log
 .env
 .env.local
 .env*.local
+frontend/
