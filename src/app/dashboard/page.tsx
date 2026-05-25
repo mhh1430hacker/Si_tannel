@@ -53,7 +53,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 md:p-6">
-      <main className="max-w-6xl mx-auto space-y-5">
+      <main className="max-w-6xl mx-auto space-y-5 animate-fade-in">
 
         {/* Onboarding reminder */}
         {!onboardingDone && (
@@ -124,7 +124,7 @@ export default function Dashboard() {
             <a key={action.href} href={action.href} className={`bg-gradient-to-bl ${action.color} rounded-2xl p-4 border hover:scale-[1.02] transition-all group`}>
               <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">{action.icon}</span>
               <h3 className="text-white font-bold text-sm">{action.label}</h3>
-              <p className="text-indigo-300 text-xs">{action.desc}</p>
+              <p className="text-indigo-200 text-xs">{action.desc}</p>
             </a>
           ))}
         </div>
@@ -216,9 +216,9 @@ export default function Dashboard() {
             { href: "/settings", icon: "⚙️", label: "إعدادات" },
             { href: "/import", icon: "📥", label: "استيراد" },
           ].map((link) => (
-            <a key={link.href} href={link.href} className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 hover:border-white/15 transition-all">
+            <a key={link.href} href={link.href} className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 hover:border-white/15 transition-all card-hover">
               <span className="text-xl block">{link.icon}</span>
-              <span className="text-indigo-300 text-xs">{link.label}</span>
+              <span className="text-indigo-200 text-xs">{link.label}</span>
             </a>
           ))}
         </div>
@@ -295,7 +295,7 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
     <div className={`bg-gradient-to-bl ${colorMap[color] || colorMap.indigo} rounded-xl p-3 border`}>
       <span className="text-xl">{icon}</span>
       <p className="text-xl font-bold text-white mt-1">{value}</p>
-      <p className="text-indigo-300 text-[10px]">{label}</p>
+      <p className="text-indigo-200 text-[10px]">{label}</p>
     </div>
   );
 }
@@ -303,7 +303,7 @@ function StatCard({ icon, label, value, color }: { icon: string; label: string; 
 function InsightCard({ insight }: { insight: AiInsight }) {
   const typeColors: Record<string, string> = {
     strength: "border-green-500/20 bg-green-600/10",
-    weakness: "border-red-500/20 bg-red-600/10",
+    weakness: "border-amber-500/20 bg-amber-600/10",
     tip: "border-blue-500/20 bg-blue-600/10",
     motivation: "border-purple-500/20 bg-purple-600/10",
     warning: "border-orange-500/20 bg-orange-600/10",

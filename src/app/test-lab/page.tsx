@@ -37,7 +37,7 @@ export default function TestLab() {
   const [category, setCategory] = useState("");
   const [question, setQuestion] = useState<Question | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [summary, setSummary] = useState<SessionSummary | null>(null);
@@ -74,6 +74,7 @@ export default function TestLab() {
 
   useEffect(() => {
     if (!category) return;
+    setLoading(true);
     fetchFirstQuestion();
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -179,64 +180,111 @@ export default function TestLab() {
 
   function getChoiceStyle(choiceId: number): string {
     const base =
-      "w-full text-right py-3 px-5 rounded-lg border-2 transition-all cursor-pointer ";
+      "w-full text-right py-3 px-5 rounded-lg border-2 transition-all duration-200 cursor-pointer ";
 
     if (lastResult) {
       if (choiceId === lastResult.correct_choice_id) {
-        return base + "border-green-500 bg-green-50 text-green-800";
+        return base + "border-green-500 bg-green-600/10 text-green-300";
       }
       if (choiceId === selectedChoice && !lastResult.is_correct) {
-        return base + "border-red-500 bg-red-50 text-red-800";
+        return base + "border-red-500 bg-red-600/10 text-red-300";
       }
-      return base + "border-gray-200 bg-white text-gray-400";
+      return base + "border-white/10 bg-white/5 text-indigo-300/50";
     }
 
     if (choiceId === selectedChoice) {
-      return base + "border-blue-500 bg-blue-50 text-blue-800";
+      return base + "border-indigo-500 bg-indigo-600/10 text-white";
     }
-    return base + "border-gray-200 bg-white hover:border-gray-400";
+    return base + "border-white/10 bg-white/5 text-indigo-200 hover:border-indigo-500/30 hover:bg-white/10";
+  }
+
+  // Category selection view
+  if (!category && !loading) {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-screen p-6">
+        <div className="max-w-lg w-full space-y-6 animate-fade-in">
+          <div className="text-center">
+            <span className="text-5xl block mb-3">🧪</span>
+            <h1 className="text-2xl font-bold text-white mb-2">معمل الاختبار</h1>
+            <p className="text-indigo-300 text-sm">اختر قسماً لبدء جلسة تكيّفية ذكية</p>
+          </div>
+          <div className="grid grid-cols-1 gap-3">
+            <button
+              onClick={() => setCategory("كمي — الرياضيات")}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-500/40 rounded-2xl p-5 text-right transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-3xl group-hover:scale-110 transition-transform">📐</span>
+                <div>
+                  <h3 className="text-white font-bold">كمي — الرياضيات</h3>
+                  <p className="text-indigo-300/70 text-xs mt-1">أسئلة كمية مع صعوبة متكيّفة</p>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setCategory("لفظي — اللغة العربية")}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/40 rounded-2xl p-5 text-right transition-all duration-200 group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-3xl group-hover:scale-110 transition-transform">📖</span>
+                <div>
+                  <h3 className="text-white font-bold">لفظي — اللغة العربية</h3>
+                  <p className="text-indigo-300/70 text-xs mt-1">أسئلة لفظية مع صعوبة متكيّفة</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          <a href="/dashboard" className="block text-center text-indigo-400 text-sm hover:text-indigo-300 transition-colors">
+            → العودة للوحة التحكم
+          </a>
+        </div>
+      </main>
+    );
   }
 
   // Summary view
   if (summary) {
+    const pct = summary.accuracy_percentage;
+    const encourageMsg = pct >= 80 ? "أداء ممتاز! أنت في المسار الصحيح 🌟" : pct >= 60 ? "أداء جيد! مع التدريب ستتحسن أكثر 💪" : "أغلب الطلاب يحتاجون تدريباً أكثر على هذا المستوى — استمر! 🚀";
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-8">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-6">ملخص الجلسة</h2>
+        <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl shadow-lg p-8 text-center animate-fade-in">
+          <h2 className="text-2xl font-bold text-white mb-2">ملخص الجلسة</h2>
+          <p className="text-indigo-300 text-sm mb-6">{encourageMsg}</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-50 rounded-xl p-4">
-              <div className="text-3xl font-bold text-green-600">
+            <div className="bg-green-600/10 border border-green-500/20 rounded-xl p-4">
+              <div className="text-3xl font-bold text-green-400">
                 {summary.correct_count}
               </div>
-              <div className="text-sm text-green-700">إجابات صحيحة</div>
+              <div className="text-sm text-green-300/70">إجابات صحيحة</div>
             </div>
-            <div className="bg-red-50 rounded-xl p-4">
-              <div className="text-3xl font-bold text-red-600">
+            <div className="bg-red-600/10 border border-red-500/20 rounded-xl p-4">
+              <div className="text-3xl font-bold text-red-400">
                 {summary.incorrect_count}
               </div>
-              <div className="text-sm text-red-700">إجابات خاطئة</div>
+              <div className="text-sm text-red-300/70">إجابات خاطئة</div>
             </div>
           </div>
           <div className="mb-4">
-            <div className="text-4xl font-bold text-blue-600">
+            <div className="text-4xl font-bold text-indigo-400">
               {summary.accuracy_percentage}%
             </div>
-            <div className="text-sm text-gray-600">نسبة الدقة</div>
+            <div className="text-sm text-indigo-300/70">نسبة الدقة</div>
           </div>
-          <div className="text-gray-500 text-sm mb-6">
+          <div className="text-indigo-300/60 text-sm mb-6">
             الوقت الإجمالي: {Math.floor(summary.total_time_seconds / 60)} دقيقة و{" "}
             {summary.total_time_seconds % 60} ثانية
           </div>
           <div className="flex gap-3 justify-center">
             <a
               href="/dashboard"
-              className="inline-block py-3 px-8 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="inline-block py-3 px-8 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition-all"
             >
               لوحة التحكم
             </a>
             <a
               href="/analytics"
-              className="inline-block py-3 px-6 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              className="inline-block py-3 px-6 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-500 transition-all"
             >
               تحليل الأداء
             </a>
@@ -252,13 +300,13 @@ export default function TestLab() {
       <main className="flex flex-col items-center justify-center min-h-screen p-8">
         <div className="max-w-2xl w-full">
           <div className="animate-pulse space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-1/4" />
-            <div className="h-20 bg-gray-200 rounded-xl" />
+            <div className="h-6 bg-white/10 rounded w-1/4" />
+            <div className="h-20 bg-white/10 rounded-xl" />
             <div className="space-y-3">
-              <div className="h-12 bg-gray-200 rounded-lg" />
-              <div className="h-12 bg-gray-200 rounded-lg" />
-              <div className="h-12 bg-gray-200 rounded-lg" />
-              <div className="h-12 bg-gray-200 rounded-lg" />
+              <div className="h-12 bg-white/10 rounded-lg" />
+              <div className="h-12 bg-white/10 rounded-lg" />
+              <div className="h-12 bg-white/10 rounded-lg" />
+              <div className="h-12 bg-white/10 rounded-lg" />
             </div>
           </div>
         </div>
@@ -270,13 +318,20 @@ export default function TestLab() {
   if (!question) {
     return (
       <main className="flex flex-col items-center justify-center min-h-screen p-8">
-        <div className="text-center">
-          <p className="text-xl text-gray-600 mb-4">
+        <div className="text-center animate-fade-in">
+          <span className="text-5xl block mb-4">📭</span>
+          <p className="text-xl text-indigo-300 mb-2">
             لا توجد أسئلة متاحة في هذا التصنيف
           </p>
-          <a href="/" className="text-blue-600 hover:underline font-medium">
-            العودة للرئيسية
-          </a>
+          <p className="text-indigo-300/60 text-sm mb-6">جرّب قسماً آخر أو استورد أسئلة جديدة</p>
+          <div className="flex gap-3 justify-center">
+            <a href="/dashboard" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-all">
+              لوحة التحكم
+            </a>
+            <a href="/import" className="px-6 py-3 bg-white/10 text-indigo-300 rounded-xl font-bold hover:bg-white/15 transition-all">
+              استيراد أسئلة
+            </a>
+          </div>
         </div>
       </main>
     );
@@ -285,18 +340,18 @@ export default function TestLab() {
   // Active question view
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="max-w-2xl w-full">
+      <div className="max-w-2xl w-full animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <span className="text-sm text-gray-500">السؤال {questionNumber}</span>
-          <span className="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-600">
+          <span className="text-sm text-indigo-300/70">السؤال {questionNumber}</span>
+          <span className="text-xs px-3 py-1 rounded-full bg-white/10 text-indigo-300">
             {question.difficulty} • {question.skill_category}
           </span>
         </div>
 
         {/* Question */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <p className="text-lg leading-relaxed">{question.content}</p>
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 mb-6">
+          <p className="text-lg leading-relaxed text-white">{question.content}</p>
           {question.image_url && (
             <div className="mt-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -332,7 +387,7 @@ export default function TestLab() {
           <button
             onClick={handleSubmit}
             disabled={selectedChoice === null || submitting}
-            className="w-full py-4 bg-blue-600 text-white rounded-xl font-medium text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-4 bg-indigo-600 text-white rounded-xl font-medium text-lg hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             {submitting ? "جاري الإرسال..." : "تأكيد وإرسال"}
           </button>
@@ -341,13 +396,13 @@ export default function TestLab() {
         {/* Result feedback */}
         {lastResult && (
           <div
-            className={`text-center py-3 rounded-xl font-medium ${
+            className={`text-center py-3 rounded-xl font-medium transition-all duration-200 ${
               lastResult.is_correct
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? "bg-green-600/10 border border-green-500/20 text-green-300"
+                : "bg-amber-600/10 border border-amber-500/20 text-amber-300"
             }`}
           >
-            {lastResult.is_correct ? "إجابة صحيحة ✓" : "إجابة خاطئة ✗"}
+            {lastResult.is_correct ? "إجابة صحيحة ✓" : "أغلب الطلاب يخطئون هنا — لا تقلق، كل خطأ يقرّبك من الإتقان 💪"}
           </div>
         )}
       </div>

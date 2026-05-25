@@ -99,12 +99,12 @@ export default function ReviewPage() {
           ) : (
             <>
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
-                <p className="text-indigo-200 text-sm mb-4">الأسئلة التي أخطأت فيها سابقاً — سيتم إزالتها عند الإجابة الصحيحة</p>
+                <p className="text-indigo-200 text-sm mb-4">هذه الأسئلة تحتاج مراجعة — أغلب الطلاب يحتاجون أكثر من محاولة لإتقانها</p>
                 <div className="space-y-2">
                   {wrongQuestions.map((q, i) => (
                     <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/5 flex items-center justify-between">
                       <p className="text-white text-sm flex-1 truncate">{q.text}</p>
-                      <span className="text-red-400 text-xs shrink-0 mr-2">خطأ {q.wrongCount}×</span>
+                      <span className="text-amber-400 text-xs shrink-0 mr-2">تحتاج مراجعة {q.wrongCount > 1 ? `(${q.wrongCount} محاولات)` : ""}</span>
                     </div>
                   ))}
                 </div>
@@ -134,7 +134,7 @@ export default function ReviewPage() {
 
         <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-6 mb-4">
           <p className="text-white text-lg leading-relaxed">{q.text}</p>
-          <span className="text-red-400 text-xs">أخطأت {q.wrongCount} مرة</span>
+          <span className="text-amber-400/70 text-xs">هذا السؤال يحتاج تركيزاً إضافياً — أنت قادر عليه!</span>
         </div>
 
         <div className="space-y-3 mb-4">
