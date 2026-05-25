@@ -1,10 +1,20 @@
-import { sql } from "@/lib/db";
+import { sql, hasDatabase } from "@/lib/db";
+import { getFirstQuestion, stripCorrectFlag } from "@/lib/memory-store";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const category = request.nextUrl.searchParams.get("category");
   if (!category) {
     return NextResponse.json({ detail: "التصنيف مطلوب" }, { status: 400 });
+  }
+
+  // In-memory fallback when no database
+  if (!hasDatabase) {
+    const q = getFirstQuestion(category);
+    if (!q) {
+      return NextResponse.json({ detail: "لا توجد أسئلة في هذا التصنيف" }, { status: 404 });
+    }
+    return NextResponse.json(stripCorrectFlag(q));
   }
 
   try {
@@ -28,7 +38,12 @@ export async function GET(request: NextRequest) {
       `;
     }
     if (result.rows.length === 0) {
-      return NextResponse.json({ detail: "لا توجد أسئلة في هذا التصنيف" }, { status: 404 });
+      // Fallback to memory store
+      const q = getFirstQuestion(category);
+      if (!q) {
+        return NextResponse.json({ detail: "لا توجد أسئلة في هذا التصنيف" }, { status: 404 });
+      }
+      return NextResponse.json(stripCorrectFlag(q));
     }
 
     const q = result.rows[0];
@@ -46,6 +61,11 @@ export async function GET(request: NextRequest) {
       choices: choices.rows.map((c) => ({ id: c.id, choice_text: c.choice_text, image_url: c.image_url })),
     });
   } catch {
-    return NextResponse.json({ detail: "خطأ في قاعدة البيانات" }, { status: 500 });
+    // DB error — fallback to memory
+    const q = getFirstQuestion(category);
+    if (!q) {
+      return NextResponse.json({ detail: "لا توجد أسئلة في هذا التصنيف" }, { status: 404 });
+    }
+    return NextResponse.json(stripCorrectFlag(q));
   }
 }

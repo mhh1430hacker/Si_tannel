@@ -1,8 +1,47 @@
-import { sql } from "@vercel/postgres";
+/**
+ * Database access layer with graceful fallback.
+ * When POSTGRES_URL is not set, `hasDatabase` is false and
+ * callers should use the in-memory question store instead.
+ */
 
-export { sql };
+const hasPostgres = !!(
+  process.env.POSTGRES_URL ||
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL_NON_POOLING
+);
+
+let sqlFn: typeof import("@vercel/postgres").sql | null = null;
+
+if (hasPostgres) {
+  try {
+    // Dynamic import so the module isn't evaluated (and doesn't throw)
+    // when the env var is missing.
+    const pg = require("@vercel/postgres");
+    sqlFn = pg.sql;
+  } catch {
+    // library not available — stay in fallback mode
+  }
+}
+
+export const hasDatabase = hasPostgres && sqlFn !== null;
+
+/**
+ * Tagged-template SQL function.
+ * Throws if called when no database is configured — callers must
+ * check `hasDatabase` first.
+ */
+export function sql(strings: TemplateStringsArray, ...values: any[]) {
+  if (!sqlFn) {
+    throw new Error("Database not configured (POSTGRES_URL missing)");
+  }
+  return sqlFn(strings, ...values);
+}
 
 export async function initializeDatabase() {
+  if (!hasDatabase) {
+    throw new Error("Database not configured");
+  }
+
   await sql`
     DO $$ BEGIN
       CREATE TYPE q_difficulty AS ENUM ('سهل', 'متوسط', 'صعب');

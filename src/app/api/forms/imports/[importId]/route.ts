@@ -1,10 +1,13 @@
-import { sql } from "@/lib/db";
+import { sql, hasDatabase } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { importId: string } }
 ) {
+  if (!hasDatabase) {
+    return NextResponse.json({ detail: "يتطلب قاعدة بيانات" }, { status: 503 });
+  }
   const importId = parseInt(params.importId);
   if (isNaN(importId)) {
     return NextResponse.json({ detail: "معرف غير صالح" }, { status: 400 });
