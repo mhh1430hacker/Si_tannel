@@ -239,20 +239,49 @@ export function generateChatResponse(message: string, data: UserData): string {
     return response;
   }
 
+  // Onboarding / preferences query
+  if (/(تفضيلات|أسلوب|طريقة تعلم|ملفي|تعريف)/.test(text)) {
+    const ob = data.onboarding;
+    if (!ob?.completed) {
+      return "لم تكمل استبيان التعريف بعد! ادخل على /onboarding لتخصيص تجربتك. 📝";
+    }
+    const styleMap: Record<string, string> = { visual: "بصري 👁️", auditory: "سمعي 👂", reading: "قراءة 📖", kinesthetic: "عملي ✋" };
+    const levelMap: Record<string, string> = { beginner: "مبتدئ 🌱", intermediate: "متوسط 📈", advanced: "متقدم 🎯" };
+    const timeMap: Record<string, string> = { morning: "الصباح 🌅", afternoon: "الظهيرة ☀️", evening: "المساء 🌇", night: "الليل 🌙" };
+    let response = "📋 ملفك الشخصي:\n";
+    response += `• أسلوب التعلم: ${styleMap[ob.learning_style] || ob.learning_style}\n`;
+    response += `• المستوى: ${levelMap[ob.experience_level] || ob.experience_level}\n`;
+    response += `• الهدف: درجة ${ob.target_score} — ${ob.daily_goal} سؤال/يوم\n`;
+    response += `• وقت الدراسة: ${timeMap[ob.study_time] || ob.study_time}\n`;
+    if (ob.weak_areas.length > 0) response += `• مجالات للتحسين: ${ob.weak_areas.length}\n`;
+    return response;
+  }
+
   // Study recommendations
   if (matchesAny(text, STUDY_PATTERNS)) {
     if (analytics.totalSessions === 0) {
+      const ob = data.onboarding;
+      if (ob?.completed) {
+        const startWith = ob.weak_areas.length > 0 ? "ابدأ بالمجالات التي حددتها كنقاط ضعف" : "ابدأ بالقسم الكمي — الرياضيات";
+        return `بناءً على تفضيلاتك (${ob.experience_level === "beginner" ? "مبتدئ" : ob.experience_level === "intermediate" ? "متوسط" : "متقدم"}):\n\n1️⃣ ${startWith}\n2️⃣ حل ${ob.daily_goal} سؤال يومياً\n3️⃣ أفضل وقت لك: ${ob.study_time === "morning" ? "الصباح" : ob.study_time === "afternoon" ? "الظهيرة" : ob.study_time === "evening" ? "المساء" : "الليل"}\n4️⃣ مدة الجلسة: ${ob.session_duration} دقيقة\n\nابدأ أول اختبار وسأحلل أداءك! 📋`;
+      }
       return "أنصحك بالبدء بالقسم الكمي — الرياضيات. ابدأ بحل ١٠ أسئلة على الأقل ثم ارجع لي وسأحلل أداءك وأعطيك خطة مخصصة! 📋";
     }
     let response = "📋 خطتك الدراسية:\n\n";
     if (analytics.weakAreas.length > 0) {
       response += `1️⃣ ركّز على: ${analytics.weakAreas.map((w) => w.category).join("، ")}\n`;
     }
-    response += `2️⃣ حل ${Math.max(10, 50 - analytics.totalQuestions)} سؤال إضافي هذا الأسبوع\n`;
+    const ob = data.onboarding;
+    const dailyGoal = ob?.completed ? ob.daily_goal : 20;
+    response += `2️⃣ حل ${Math.max(10, dailyGoal - (data.study_minutes_today > 0 ? Math.floor(data.study_minutes_today / 2) : 0))} سؤال إضافي اليوم\n`;
     if (analytics.avgTimePerQuestion > 60) {
       response += `3️⃣ تدرّب على السرعة — حاول الإجابة في أقل من ٦٠ ثانية\n`;
     }
     response += `4️⃣ ادرس يومياً حتى لو ١٥ دقيقة فقط\n`;
+    if (ob?.completed && ob.target_score > 0) {
+      const currentProjection = Math.min(100, Math.round(analytics.overallAccuracy * 1.1));
+      response += `\n🎯 هدفك: ${ob.target_score} — التوقع الحالي: ~${currentProjection}\n`;
+    }
     const unlockedCount = data.achievements.filter((a) => a.unlocked).length;
     response += `\nإنجازاتك: ${unlockedCount}/${data.achievements.length} — أكمل المزيد!`;
     return response;

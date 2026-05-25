@@ -46,6 +46,18 @@ export interface StudyStreak {
   last_study_date: string;
 }
 
+export interface OnboardingPreferences {
+  learning_style: "visual" | "auditory" | "kinesthetic" | "reading" | "";
+  study_time: "morning" | "afternoon" | "evening" | "night" | "";
+  session_duration: number; // minutes
+  experience_level: "beginner" | "intermediate" | "advanced" | "";
+  weak_areas: string[];
+  target_score: number;
+  daily_goal: number; // questions per day
+  motivation: string;
+  completed: boolean;
+}
+
 export interface UserData {
   profile: UserProfile;
   sessions: SessionRecord[];
@@ -55,6 +67,7 @@ export interface UserData {
   total_points: number;
   study_minutes_today: number;
   last_active: string;
+  onboarding?: OnboardingPreferences;
 }
 
 const STORAGE_KEY = "qudrat_user_data";

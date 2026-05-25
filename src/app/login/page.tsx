@@ -22,7 +22,7 @@ export default function LoginPage() {
       return;
     }
     login(name.trim(), email.trim());
-    router.push("/dashboard");
+    router.push("/onboarding");
   }
 
   return (
