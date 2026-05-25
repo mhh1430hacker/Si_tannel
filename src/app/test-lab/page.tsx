@@ -6,6 +6,7 @@ import ObservationalNudge from "@/components/ObservationalNudge";
 interface Choice {
   id: number;
   choice_text: string;
+  image_url: string | null;
 }
 
 interface Question {
@@ -14,6 +15,7 @@ interface Question {
   skill_category: string;
   difficulty: string;
   expected_time_seconds: number;
+  image_url: string | null;
   choices: Choice[];
 }
 
@@ -277,6 +279,12 @@ export default function TestLab() {
         {/* Question */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <p className="text-lg leading-relaxed">{question.content}</p>
+          {question.image_url && (
+            <div className="mt-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={question.image_url} alt="صورة السؤال" className="max-h-64 rounded-lg border border-gray-200" />
+            </div>
+          )}
         </div>
 
         {/* Choices */}
@@ -290,6 +298,12 @@ export default function TestLab() {
               disabled={!!lastResult}
               className={getChoiceStyle(choice.id)}
             >
+              {choice.image_url && (
+                <span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={choice.image_url} alt="" className="max-h-12 rounded inline-block ml-2" />
+                </span>
+              )}
               {choice.choice_text}
             </button>
           ))}
