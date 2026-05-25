@@ -296,3 +296,38 @@ export function getSmartRecommendations(data: UserData): string[] {
 
   return recs.slice(0, 4);
 }
+
+// ===== Wrong Answer Tracking =====
+
+const WRONG_KEY = "qudrat_wrong_answers";
+
+export interface WrongAnswer {
+  questionText: string;
+  sectionId: string;
+  wrongCount: number;
+  lastWrong: string;
+}
+
+export function getWrongAnswers(): WrongAnswer[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(WRONG_KEY) || "[]");
+  } catch { return []; }
+}
+
+export function saveWrongAnswer(questionText: string, sectionId: string): void {
+  const wrongs = getWrongAnswers();
+  const existing = wrongs.find((w) => w.questionText === questionText);
+  if (existing) {
+    existing.wrongCount++;
+    existing.lastWrong = new Date().toISOString();
+  } else {
+    wrongs.push({ questionText, sectionId, wrongCount: 1, lastWrong: new Date().toISOString() });
+  }
+  localStorage.setItem(WRONG_KEY, JSON.stringify(wrongs));
+}
+
+export function removeWrongAnswer(questionText: string): void {
+  const wrongs = getWrongAnswers().filter((w) => w.questionText !== questionText);
+  localStorage.setItem(WRONG_KEY, JSON.stringify(wrongs));
+}

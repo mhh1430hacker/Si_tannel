@@ -40,40 +40,8 @@ export default function Dashboard() {
   const unlockedAchievements = user.achievements.filter((a) => a.unlocked);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950">
-      {/* Header */}
-      <header className="bg-black/20 backdrop-blur border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg"
-              style={{ backgroundColor: user.profile.avatar_color }}
-            >
-              {user.profile.name.charAt(0)}
-            </div>
-            <div>
-              <h1 className="text-white font-bold">{user.profile.name}</h1>
-              <p className="text-indigo-300 text-xs">{user.total_points} نقطة</p>
-            </div>
-          </div>
-          <nav className="flex items-center gap-3">
-            <a href="/ai-chat" className="px-4 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 rounded-lg text-sm transition-colors border border-purple-500/30">
-              🤖 المساعد الذكي
-            </a>
-            <a href="/flashcards" className="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 rounded-lg text-sm transition-colors border border-indigo-500/30">
-              📇 بطاقات
-            </a>
-            <a href="/analytics" className="px-4 py-2 bg-teal-600/30 hover:bg-teal-600/50 text-teal-200 rounded-lg text-sm transition-colors border border-teal-500/30">
-              📊 تحليل
-            </a>
-            <a href="/import" className="px-4 py-2 bg-gray-600/30 hover:bg-gray-600/50 text-gray-200 rounded-lg text-sm transition-colors border border-gray-500/30">
-              📥 استيراد
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div className="p-4 md:p-8">
+      <main className="max-w-5xl mx-auto space-y-6">
         {/* Daily Motivation */}
         <div className="bg-gradient-to-l from-indigo-600/20 to-purple-600/20 rounded-2xl p-5 border border-indigo-500/20">
           <p className="text-indigo-100 text-lg leading-relaxed">{motivation}</p>
