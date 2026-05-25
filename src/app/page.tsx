@@ -26,10 +26,19 @@ export default function Home() {
 
         {loading ? (
           <div className="animate-pulse h-32 bg-gray-200 rounded-xl" />
-        ) : categories.length === 0 ? (
-          <p className="text-gray-500">لا توجد تصنيفات متاحة حالياً</p>
         ) : (
           <div className="grid gap-4">
+            {categories.length === 0 && (
+              <div className="text-center py-6">
+                <p className="text-gray-500 mb-3">لا توجد أسئلة مستوردة بعد</p>
+                <a
+                  href="/import"
+                  className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                >
+                  جلب أسئلة القدرات
+                </a>
+              </div>
+            )}
             {categories.map((cat) => (
               <button
                 key={cat}

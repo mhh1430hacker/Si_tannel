@@ -36,6 +36,12 @@ interface FormImport {
   imported_at: string;
 }
 
+interface QudratSectionInfo {
+  section_id: string;
+  section_name: string;
+  question_count: number;
+}
+
 export default function ImportPage() {
   const [formUrl, setFormUrl] = useState("");
   const [skillCategory, setSkillCategory] = useState("");
@@ -47,8 +53,13 @@ export default function ImportPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showImports, setShowImports] = useState(false);
-  // Track manually selected correct answers: question_id -> choice index
   const [correctAnswers, setCorrectAnswers] = useState<Record<string, number>>({});
+
+  // Qudrat section state
+  const [qudratSections, setQudratSections] = useState<QudratSectionInfo[] | null>(null);
+  const [loadingQudrat, setLoadingQudrat] = useState(false);
+  const [importingQudrat, setImportingQudrat] = useState<string | null>(null);
+  const [qudratDifficulty, setQudratDifficulty] = useState("متوسط");
 
   async function handlePreview() {
     if (!formUrl.trim()) return;
@@ -70,7 +81,6 @@ export default function ImportPage() {
       setPreview(data);
       if (!skillCategory && data.title) setSkillCategory(data.title);
 
-      // Pre-fill correct answers from form data
       const autoAnswers: Record<string, number> = {};
       for (const q of data.questions) {
         if (!q.is_mcq) continue;
@@ -145,6 +155,47 @@ export default function ImportPage() {
     setCorrectAnswers((prev) => ({ ...prev, [questionId]: choiceIdx }));
   }
 
+  async function fetchQudratSections() {
+    setLoadingQudrat(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/qudrat/fetch`);
+      const data = await res.json();
+      setQudratSections(data.sections);
+    } catch {
+      setError("فشل في تحميل أقسام القدرات");
+    } finally {
+      setLoadingQudrat(false);
+    }
+  }
+
+  async function importQudratSection(sectionId: string) {
+    setImportingQudrat(sectionId);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch(`/api/qudrat/import`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section_id: sectionId, difficulty: qudratDifficulty }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "فشل في الاستيراد");
+      }
+      const data = await res.json();
+      if (data.imported > 0) {
+        setSuccess(`تم استيراد ${data.imported} سؤال جديد في "${data.section_name}"`);
+      } else {
+        setSuccess(`جميع الأسئلة مستوردة مسبقاً (${data.skipped_duplicates} سؤال موجود)`);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setImportingQudrat(null);
+    }
+  }
+
   const mcqQuestions = preview?.questions.filter((q) => q.is_mcq) || [];
   const questionsWithAnswers = mcqQuestions.filter((q) => correctAnswers[q.question_id] !== undefined).length;
 
@@ -152,7 +203,7 @@ export default function ImportPage() {
     <main className="flex flex-col items-center min-h-screen p-8">
       <div className="max-w-2xl w-full">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold">استيراد أسئلة من Google Forms</h1>
+          <h1 className="text-2xl font-bold">استيراد الأسئلة</h1>
           <a href="/" className="text-sm text-blue-600 hover:underline">← الرئيسية</a>
         </div>
 
@@ -163,8 +214,63 @@ export default function ImportPage() {
           <div className="mb-4 p-3 rounded-lg bg-green-50 text-green-700 text-sm">{success}</div>
         )}
 
-        {/* Form URL Input */}
+        {/* ====== Qudrat Questions from Internet ====== */}
+        <div className="bg-white rounded-xl border-2 border-indigo-200 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">📚</span>
+            <div>
+              <h2 className="text-lg font-bold text-indigo-900">أسئلة قدرات جاهزة</h2>
+              <p className="text-xs text-gray-500">أسئلة تدريبية للقسم الكمي واللفظي مع الإجابات الصحيحة</p>
+            </div>
+          </div>
+
+          {!qudratSections ? (
+            <button
+              onClick={fetchQudratSections}
+              disabled={loadingQudrat}
+              className="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+            >
+              {loadingQudrat ? "جارٍ التحميل..." : "جلب أسئلة القدرات من الإنترنت"}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-600 mb-1">مستوى الصعوبة</label>
+                <select
+                  value={qudratDifficulty}
+                  onChange={(e) => setQudratDifficulty(e.target.value)}
+                  className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+                >
+                  <option value="سهل">سهل</option>
+                  <option value="متوسط">متوسط</option>
+                  <option value="صعب">صعب</option>
+                </select>
+              </div>
+              {qudratSections.map((sec) => (
+                <div
+                  key={sec.section_id}
+                  className="flex items-center justify-between p-4 rounded-lg border border-indigo-100 bg-indigo-50/30"
+                >
+                  <div>
+                    <p className="font-medium text-indigo-900">{sec.section_name}</p>
+                    <p className="text-xs text-gray-500">{sec.question_count} سؤال مع الإجابات</p>
+                  </div>
+                  <button
+                    onClick={() => importQudratSection(sec.section_id)}
+                    disabled={importingQudrat === sec.section_id}
+                    className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  >
+                    {importingQudrat === sec.section_id ? "جارٍ..." : "استيراد"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ====== Google Form Import ====== */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-bold mb-3">استيراد من Google Forms</h2>
           <label className="block text-sm font-medium text-gray-700 mb-2">رابط النموذج</label>
           <input
             type="url"
@@ -255,7 +361,6 @@ export default function ImportPage() {
                     </div>
                   </div>
 
-                  {/* Question image */}
                   {q.image_url && (
                     <div className="mb-2 mr-5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -267,7 +372,6 @@ export default function ImportPage() {
                     </div>
                   )}
 
-                  {/* Choices with correct answer selection */}
                   {q.is_mcq && (
                     <div className="mr-5 space-y-1">
                       {q.choices.map((c, ci) => {
