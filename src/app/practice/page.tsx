@@ -64,12 +64,15 @@ export default function PracticePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
-      <div className="max-w-2xl mx-auto pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <a href="/dashboard" className="text-indigo-300 hover:text-white text-sm">→ العودة</a>
-          <h1 className="text-xl font-bold text-white">🎯 وضع التدريب</h1>
-          <span className="text-indigo-300 text-sm">{stats.correct}✓ {stats.wrong}✗</span>
+    <div className="p-4 md:p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-xl font-bold text-white">🎯 تدريب حر</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-green-400 text-sm font-bold">{stats.correct}✓</span>
+            <span className="text-red-400 text-sm font-bold">{stats.wrong}✗</span>
+            <a href="/exam" className="px-3 py-1 bg-white/10 hover:bg-white/15 text-indigo-300 rounded-lg text-xs transition-all">📝 اختبار</a>
+          </div>
         </div>
 
         {/* Section toggle */}
