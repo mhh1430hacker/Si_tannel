@@ -49,6 +49,7 @@ export default function BrainMapPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hoveredRef = useRef<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
@@ -146,13 +147,13 @@ export default function BrainMapPage() {
         const y = node.y * h;
         const r = node.radius * 2;
         const pulse = 1 + Math.sin(t * 3 + node.x * 5) * 0.05;
-        const isHovered = hoveredNode === node.id;
+        const isHovered = hoveredRef.current === node.id;
 
         // Glow
         const gradient = ctx!.createRadialGradient(x, y, 0, x, y, r * pulse * (isHovered ? 1.5 : 1.2));
-        gradient.addColorStop(0, `hsl(${node.color})`);
+        gradient.addColorStop(0, `hsla(${node.color}, 1)`);
         gradient.addColorStop(0.7, `hsla(${node.color}, 0.38)`);
-        gradient.addColorStop(1, "transparent");
+        gradient.addColorStop(1, `hsla(${node.color}, 0)`);
         ctx!.fillStyle = gradient;
         ctx!.beginPath();
         ctx!.arc(x, y, r * pulse * (isHovered ? 1.5 : 1.2), 0, Math.PI * 2);
@@ -201,6 +202,7 @@ export default function BrainMapPage() {
           break;
         }
       }
+      hoveredRef.current = found;
       setHoveredNode(found);
     }
     canvas.addEventListener("mousemove", handleMouseMove);
@@ -220,6 +222,7 @@ export default function BrainMapPage() {
           break;
         }
       }
+      hoveredRef.current = found;
       setHoveredNode(found);
     }
     canvas.addEventListener("touchmove", handleTouch, { passive: false });
@@ -231,7 +234,8 @@ export default function BrainMapPage() {
       canvas.removeEventListener("touchmove", handleTouch);
       canvas.removeEventListener("touchstart", handleTouch);
     };
-  }, [user, hoveredNode, loading]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading]);
 
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-indigo-950"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;

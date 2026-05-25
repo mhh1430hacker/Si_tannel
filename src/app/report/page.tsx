@@ -205,6 +205,26 @@ export default function ReportPage() {
                 ))}
               </div>
             </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <a href="/practice" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">🎯</span>
+                <span className="text-indigo-300 text-xs">تدريب</span>
+              </a>
+              <a href="/review" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">🔄</span>
+                <span className="text-indigo-300 text-xs">مراجعة أخطاء</span>
+              </a>
+              <a href="/brain-map" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">🧠</span>
+                <span className="text-indigo-300 text-xs">خريطة دماغية</span>
+              </a>
+              <a href="/study-plan" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">📅</span>
+                <span className="text-indigo-300 text-xs">خطة دراسية</span>
+              </a>
+            </div>
           </>
         )}
       </div>
