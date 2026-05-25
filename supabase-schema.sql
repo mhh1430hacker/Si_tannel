@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS session_records (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Crawled questions bank (from web crawling)
+-- Crawled questions bank (from web crawling and form imports)
 CREATE TABLE IF NOT EXISTS crawled_questions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   text TEXT NOT NULL,
@@ -119,10 +119,14 @@ CREATE TABLE IF NOT EXISTS crawled_questions (
   difficulty TEXT DEFAULT 'متوسط',
   source_url TEXT,
   explanation TEXT,
+  image_url TEXT, -- question image URL (from form imports)
   is_approved BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(text)
 );
+
+-- Add image_url column if table already exists (migration)
+ALTER TABLE crawled_questions ADD COLUMN IF NOT EXISTS image_url TEXT;
 
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
