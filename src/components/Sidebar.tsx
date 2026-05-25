@@ -4,12 +4,17 @@ import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/Notifications";
+import { getLeague } from "@/lib/league-system";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: "🏠", label: "الرئيسية" },
+  { href: "/challenge", icon: "⚔️", label: "تحدي الأقران" },
   { href: "/exam", icon: "📝", label: "اختبار محاكي" },
   { href: "/practice", icon: "🎯", label: "تدريب" },
   { href: "/review", icon: "🔄", label: "مراجعة الأخطاء" },
+  { href: "/leaderboard", icon: "🏅", label: "المتصدرين" },
+  { href: "/brain-map", icon: "🧠", label: "الخريطة الدماغية" },
+  { href: "/skill-tree", icon: "🌳", label: "شجرة المهارات" },
   { href: "/flashcards", icon: "📇", label: "بطاقات" },
   { href: "/ai-chat", icon: "🤖", label: "المساعد الذكي" },
   { href: "/analytics", icon: "📊", label: "تحليل الأداء" },
@@ -60,7 +65,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
               </div>
               <div className="min-w-0">
                 <p className="text-white text-sm font-medium truncate">{user.profile.name}</p>
-                <p className="text-indigo-400 text-xs">{user.total_points} نقطة</p>
+                <p className="text-indigo-400 text-xs">{getLeague(user.total_points).icon} {user.total_points} نقطة</p>
               </div>
             </div>
           </div>
