@@ -4,14 +4,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { form_url, skill_category, difficulty = "متوسط" } = await request.json();
+    const body = await request.json();
+    const { form_url, skill_category, difficulty = "متوسط", correct_answers } = body;
     if (!form_url || !skill_category) {
       return NextResponse.json({ detail: "رابط النموذج والتصنيف مطلوبان" }, { status: 400 });
     }
 
+    // correct_answers: optional map of question_id -> correct choice index (0-based)
+    const manualAnswers: Record<string, number> = correct_answers || {};
+
     const formData = await scrapeGoogleForm(form_url);
 
-    // Upsert form import record
     const existing = await sql`SELECT id FROM form_imports WHERE form_url = ${formData.form_url}`;
     let formImportId: number;
     if (existing.rows.length > 0) {
@@ -49,10 +52,19 @@ export async function POST(request: NextRequest) {
       `;
       const qid = qr.rows[0].id;
 
+      // Determine correct answer: manual override > form answer key > none
+      const manualIdx = manualAnswers[fq.question_id];
+
       for (let i = 0; i < fq.choices.length; i++) {
+        let isCorrect = false;
+        if (manualIdx !== undefined) {
+          isCorrect = i === manualIdx;
+        } else if (fq.choices[i].is_correct === true) {
+          isCorrect = true;
+        }
         await sql`
           INSERT INTO question_choices (question_id, choice_text, is_correct, image_url)
-          VALUES (${qid}, ${fq.choices[i].text}, ${i === 0}, ${fq.choices[i].image_url})
+          VALUES (${qid}, ${fq.choices[i].text}, ${isCorrect}, ${fq.choices[i].image_url})
         `;
       }
       imported.push({ id: qid, content, image_url: fq.image_url, choices_count: fq.choices.length });

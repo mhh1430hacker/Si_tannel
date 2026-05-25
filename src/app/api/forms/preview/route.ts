@@ -15,8 +15,13 @@ export async function POST(request: NextRequest) {
         text: q.text,
         image_url: q.image_url,
         question_type: q.question_type,
-        choices: q.choices.map((c) => ({ text: c.text, image_url: c.image_url })),
+        choices: q.choices.map((c) => ({
+          text: c.text,
+          image_url: c.image_url,
+          is_correct: c.is_correct,
+        })),
         is_mcq: isMcq,
+        has_answer_key: q.has_answer_key,
       };
     });
     return NextResponse.json({
@@ -25,6 +30,7 @@ export async function POST(request: NextRequest) {
       total_questions: formData.questions.length,
       mcq_questions: questions.filter((q) => q.is_mcq).length,
       questions,
+      is_quiz: formData.is_quiz,
     });
   } catch (error: any) {
     return NextResponse.json({ detail: error.message || "فشل في استخراج النموذج" }, { status: 400 });
