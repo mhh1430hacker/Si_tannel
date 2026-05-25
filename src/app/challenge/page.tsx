@@ -136,6 +136,14 @@ export default function ChallengePage() {
     setTimeout(processNextQuestion, 2000);
   }
 
+  // Trigger win effects when result phase is reached
+  useEffect(() => {
+    if (phase === "result" && battle.userScore > battle.opponentScore) {
+      launchConfetti(4000);
+      playChallengeWinSound();
+    }
+  }, [phase, battle.userScore, battle.opponentScore]);
+
   useEffect(() => {
     return () => {
       if (opponentTimerRef.current) clearTimeout(opponentTimerRef.current);
@@ -227,14 +235,6 @@ export default function ChallengePage() {
     const draw = battle.userScore === battle.opponentScore;
     const userAvgTime = battle.userTimes.length > 0 ? Math.round(battle.userTimes.reduce((s, t) => s + t, 0) / battle.userTimes.length) : 0;
     const oppAvgTime = battle.opponentTimes.length > 0 ? Math.round(battle.opponentTimes.reduce((s, t) => s + t, 0) / battle.opponentTimes.length) : 0;
-
-    // Trigger effects
-    useEffect(() => {
-      if (userWon) {
-        launchConfetti(4000);
-        playChallengeWinSound();
-      }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { getPerformanceAnalytics } from "@/lib/user-store";
@@ -11,16 +11,14 @@ interface BrainNode {
   x: number;
   y: number;
   radius: number;
-  strength: number; // 0-1
-  color: string;
+  strength: number;
+  r: number; g: number; b: number;
   connections: string[];
   category: "kamy" | "lafzy" | "meta";
 }
 
-const SKILL_NODES: Omit<BrainNode, "strength" | "color">[] = [
-  // Core
+const SKILL_NODES: Omit<BrainNode, "strength" | "r" | "g" | "b">[] = [
   { id: "core", label: "القدرات", x: 0.5, y: 0.5, radius: 30, connections: ["kamy", "lafzy"], category: "meta" },
-  // Kamy branch
   { id: "kamy", label: "كمي", x: 0.3, y: 0.35, radius: 24, connections: ["core", "algebra", "geometry", "stats", "speed_math"], category: "kamy" },
   { id: "algebra", label: "الجبر", x: 0.12, y: 0.2, radius: 18, connections: ["kamy", "equations"], category: "kamy" },
   { id: "equations", label: "المعادلات", x: 0.05, y: 0.35, radius: 14, connections: ["algebra"], category: "kamy" },
@@ -29,7 +27,6 @@ const SKILL_NODES: Omit<BrainNode, "strength" | "color">[] = [
   { id: "stats", label: "الإحصاء", x: 0.35, y: 0.15, radius: 16, connections: ["kamy", "averages"], category: "kamy" },
   { id: "averages", label: "المتوسطات", x: 0.42, y: 0.05, radius: 13, connections: ["stats"], category: "kamy" },
   { id: "speed_math", label: "الحساب السريع", x: 0.15, y: 0.45, radius: 15, connections: ["kamy"], category: "kamy" },
-  // Lafzy branch
   { id: "lafzy", label: "لفظي", x: 0.7, y: 0.35, radius: 24, connections: ["core", "analogy", "completion", "context_err", "comprehension"], category: "lafzy" },
   { id: "analogy", label: "التناظر", x: 0.85, y: 0.2, radius: 18, connections: ["lafzy", "relations"], category: "lafzy" },
   { id: "relations", label: "العلاقات", x: 0.95, y: 0.1, radius: 13, connections: ["analogy"], category: "lafzy" },
@@ -38,34 +35,39 @@ const SKILL_NODES: Omit<BrainNode, "strength" | "color">[] = [
   { id: "context_err", label: "الخطأ السياقي", x: 0.75, y: 0.55, radius: 16, connections: ["lafzy"], category: "lafzy" },
   { id: "comprehension", label: "استيعاب المقروء", x: 0.6, y: 0.2, radius: 17, connections: ["lafzy", "main_idea"], category: "lafzy" },
   { id: "main_idea", label: "الفكرة الرئيسية", x: 0.55, y: 0.08, radius: 13, connections: ["comprehension"], category: "lafzy" },
-  // Meta skills
   { id: "speed", label: "السرعة", x: 0.5, y: 0.7, radius: 16, connections: ["core", "focus"], category: "meta" },
   { id: "focus", label: "التركيز", x: 0.4, y: 0.82, radius: 15, connections: ["speed", "endurance"], category: "meta" },
   { id: "endurance", label: "التحمل", x: 0.6, y: 0.82, radius: 15, connections: ["speed", "focus"], category: "meta" },
   { id: "accuracy_skill", label: "الدقة", x: 0.5, y: 0.9, radius: 16, connections: ["focus", "endurance"], category: "meta" },
 ];
 
+function getCategoryColor(cat: "kamy" | "lafzy" | "meta", strength: number): { r: number; g: number; b: number } {
+  const s = 0.4 + strength * 0.6;
+  if (cat === "kamy") return { r: Math.round(80 * s), g: Math.round(90 * s), b: Math.round(230 * s) };
+  if (cat === "lafzy") return { r: Math.round(160 * s), g: Math.round(80 * s), b: Math.round(220 * s) };
+  return { r: Math.round(60 * s), g: Math.round(150 * s), b: Math.round(220 * s) };
+}
+
 export default function BrainMapPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const animRef = useRef<number>(0);
   const timeRef = useRef(0);
+  const hoveredRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [loading, user, router]);
 
-  useEffect(() => {
+  const startAnimation = useCallback(() => {
     if (!user || !canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const maybeCtx = canvas.getContext("2d");
+    if (!maybeCtx) return;
+    const ctx: CanvasRenderingContext2D = maybeCtx;
 
     const a = getPerformanceAnalytics(user);
-
-    // Compute strengths based on user data
     const kamyAcc = a.categoryBreakdown.find((c) => c.category.includes("كمي"))?.accuracy ?? 50;
     const lafzyAcc = a.categoryBreakdown.find((c) => c.category.includes("لفظي"))?.accuracy ?? 50;
     const overallAcc = a.overallAccuracy || 50;
@@ -88,97 +90,91 @@ export default function BrainMapPage() {
 
     const nodes: BrainNode[] = SKILL_NODES.map((n) => {
       const strength = getStrength(n.id);
-      const hue = n.category === "kamy" ? 240 : n.category === "lafzy" ? 280 : 200;
-      const lightness = 40 + strength * 30;
-      return { ...n, strength, color: `hsl(${hue}, 70%, ${lightness}%)` };
+      const { r, g, b } = getCategoryColor(n.category, strength);
+      return { ...n, strength, r, g, b };
     });
 
-    function resize() {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      if (rect) {
-        canvas.width = rect.width * 2;
-        canvas.height = rect.height * 2;
-        canvas.style.width = rect.width + "px";
-        canvas.style.height = rect.height + "px";
-      }
+    // Resize canvas
+    const rect = canvas.parentElement?.getBoundingClientRect();
+    if (rect) {
+      canvas.width = rect.width * 2;
+      canvas.height = rect.height * 2;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
     }
-    resize();
 
     function draw() {
       timeRef.current += 0.01;
       const t = timeRef.current;
       const w = canvas.width;
       const h = canvas.height;
-      ctx!.clearRect(0, 0, w, h);
+      ctx.clearRect(0, 0, w, h);
 
       // Draw connections
       for (const node of nodes) {
         for (const connId of node.connections) {
-          const conn = nodes.find((n) => n.id === connId);
+          const conn = nodes.find((nd) => nd.id === connId);
           if (!conn) continue;
-          const x1 = node.x * w;
-          const y1 = node.y * h;
-          const x2 = conn.x * w;
-          const y2 = conn.y * h;
-          const strength = (node.strength + conn.strength) / 2;
+          const x1 = node.x * w, y1 = node.y * h;
+          const x2 = conn.x * w, y2 = conn.y * h;
+          const str = (node.strength + conn.strength) / 2;
 
-          ctx!.beginPath();
-          ctx!.moveTo(x1, y1);
-          ctx!.lineTo(x2, y2);
-          ctx!.strokeStyle = `rgba(99, 102, 241, ${strength * 0.4})`;
-          ctx!.lineWidth = 1 + strength * 2;
-          ctx!.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = `rgba(99, 102, 241, ${str * 0.4})`;
+          ctx.lineWidth = 1 + str * 2;
+          ctx.stroke();
 
-          // Animated pulse along connection
           const pulsePos = (Math.sin(t * 2 + node.x * 10) + 1) / 2;
           const px = x1 + (x2 - x1) * pulsePos;
           const py = y1 + (y2 - y1) * pulsePos;
-          ctx!.beginPath();
-          ctx!.arc(px, py, 2 + strength * 2, 0, Math.PI * 2);
-          ctx!.fillStyle = `rgba(139, 92, 246, ${strength * 0.6})`;
-          ctx!.fill();
+          ctx.beginPath();
+          ctx.arc(px, py, 2 + str * 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(139, 92, 246, ${str * 0.6})`;
+          ctx.fill();
         }
       }
 
       // Draw nodes
+      const hovered = hoveredRef.current;
       for (const node of nodes) {
-        const x = node.x * w;
-        const y = node.y * h;
-        const r = node.radius * 2;
+        const x = node.x * w, y = node.y * h;
+        const rd = node.radius * 2;
         const pulse = 1 + Math.sin(t * 3 + node.x * 5) * 0.05;
-        const isHovered = hoveredNode === node.id;
+        const isHov = hovered === node.id;
+        const outerR = rd * pulse * (isHov ? 1.5 : 1.2);
 
         // Glow
-        const gradient = ctx!.createRadialGradient(x, y, 0, x, y, r * pulse * (isHovered ? 1.5 : 1.2));
-        gradient.addColorStop(0, node.color);
-        gradient.addColorStop(0.7, node.color + "60");
-        gradient.addColorStop(1, "transparent");
-        ctx!.fillStyle = gradient;
-        ctx!.beginPath();
-        ctx!.arc(x, y, r * pulse * (isHovered ? 1.5 : 1.2), 0, Math.PI * 2);
-        ctx!.fill();
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, outerR);
+        gradient.addColorStop(0, `rgba(${node.r}, ${node.g}, ${node.b}, 1)`);
+        gradient.addColorStop(0.7, `rgba(${node.r}, ${node.g}, ${node.b}, 0.35)`);
+        gradient.addColorStop(1, `rgba(${node.r}, ${node.g}, ${node.b}, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, outerR, 0, Math.PI * 2);
+        ctx.fill();
 
         // Core circle
-        ctx!.beginPath();
-        ctx!.arc(x, y, r * pulse * 0.6, 0, Math.PI * 2);
-        ctx!.fillStyle = node.color;
-        ctx!.fill();
-        ctx!.strokeStyle = `rgba(255,255,255,${node.strength * 0.5})`;
-        ctx!.lineWidth = 1;
-        ctx!.stroke();
+        ctx.beginPath();
+        ctx.arc(x, y, rd * pulse * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${node.r}, ${node.g}, ${node.b}, 1)`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(255,255,255,${node.strength * 0.5})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
         // Label
-        ctx!.fillStyle = `rgba(255,255,255,${0.6 + node.strength * 0.4})`;
-        ctx!.font = `${isHovered ? "bold " : ""}${r * 0.5}px sans-serif`;
-        ctx!.textAlign = "center";
-        ctx!.textBaseline = "middle";
-        ctx!.fillText(node.label, x, y);
+        ctx.fillStyle = `rgba(255,255,255,${0.6 + node.strength * 0.4})`;
+        ctx.font = `${isHov ? "bold " : ""}${rd * 0.5}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.label, x, y);
 
-        // Strength percentage
-        if (isHovered) {
-          ctx!.fillStyle = "rgba(255,255,255,0.8)";
-          ctx!.font = `${r * 0.35}px sans-serif`;
-          ctx!.fillText(`${Math.round(node.strength * 100)}٪`, x, y + r * 0.6);
+        if (isHov) {
+          ctx.fillStyle = "rgba(255,255,255,0.8)";
+          ctx.font = `${rd * 0.35}px sans-serif`;
+          ctx.fillText(`${Math.round(node.strength * 100)}%`, x, y + rd * 0.6);
         }
       }
 
@@ -187,21 +183,16 @@ export default function BrainMapPage() {
 
     draw();
 
-    // Mouse tracking
     function handleMouseMove(e: MouseEvent) {
-      const rect = canvas.getBoundingClientRect();
-      const mx = (e.clientX - rect.left) / rect.width;
-      const my = (e.clientY - rect.top) / rect.height;
+      const r = canvas.getBoundingClientRect();
+      const mx = (e.clientX - r.left) / r.width;
+      const my = (e.clientY - r.top) / r.height;
       let found: string | null = null;
       for (const node of nodes) {
-        const dx = mx - node.x;
-        const dy = my - node.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 0.05) {
-          found = node.id;
-          break;
-        }
+        const dx = mx - node.x, dy = my - node.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 0.05) { found = node.id; break; }
       }
-      setHoveredNode(found);
+      hoveredRef.current = found;
     }
     canvas.addEventListener("mousemove", handleMouseMove);
 
@@ -209,13 +200,17 @@ export default function BrainMapPage() {
       cancelAnimationFrame(animRef.current);
       canvas.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [user, hoveredNode, loading]);
+  }, [user]);
+
+  useEffect(() => {
+    return startAnimation();
+  }, [startAnimation]);
 
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-indigo-950"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;
   }
 
-  const a = getPerformanceAnalytics(user);
+  const analytics = getPerformanceAnalytics(user);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
@@ -230,12 +225,10 @@ export default function BrainMapPage() {
           شبكة عصبية تعرض مهاراتك — كلما زاد الإتقان زاد السطوع والحجم
         </p>
 
-        {/* Canvas */}
         <div className="bg-black/30 rounded-3xl border border-white/10 overflow-hidden" style={{ height: "500px" }}>
           <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" />
         </div>
 
-        {/* Legend */}
         <div className="flex gap-4 justify-center mt-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-indigo-500" />
@@ -251,18 +244,17 @@ export default function BrainMapPage() {
           </div>
         </div>
 
-        {/* Stats underneath */}
         <div className="grid grid-cols-3 gap-3 mt-6">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-            <p className="text-2xl font-bold text-white">{a.totalQuestions}</p>
+            <p className="text-2xl font-bold text-white">{analytics.totalQuestions}</p>
             <p className="text-indigo-300 text-xs">إجمالي الأسئلة</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-            <p className="text-2xl font-bold text-white">{a.overallAccuracy}٪</p>
+            <p className="text-2xl font-bold text-white">{analytics.overallAccuracy}٪</p>
             <p className="text-indigo-300 text-xs">الدقة الكلية</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-            <p className="text-2xl font-bold text-white">{a.categoryBreakdown.length}</p>
+            <p className="text-2xl font-bold text-white">{analytics.categoryBreakdown.length}</p>
             <p className="text-indigo-300 text-xs">أقسام مُختبرة</p>
           </div>
         </div>
