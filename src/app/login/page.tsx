@@ -77,9 +77,12 @@ export default function LoginPage() {
           </button>
 
           <p className="text-indigo-300/60 text-xs text-center mt-4">
-            بياناتك محفوظة محلياً على جهازك فقط
+            بياناتك محفوظة محلياً ويتم مزامنتها تلقائياً عند الاتصال بالسحابة
           </p>
         </form>
+        <p className="text-center mt-4">
+          <a href="/" className="text-indigo-400 hover:text-white text-sm transition-colors">→ العودة للصفحة الرئيسية</a>
+        </p>
       </div>
     </div>
   );
