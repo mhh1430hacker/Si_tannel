@@ -254,12 +254,18 @@ export default function ExamPage() {
             </div>
           </div>
 
-          <div className="flex gap-3 justify-center">
-            <button onClick={() => { setPhase("setup"); setAnswers([]); }} className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
-              اختبار جديد
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button onClick={() => { setPhase("setup"); setAnswers([]); }} className="px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
+              📝 اختبار جديد
             </button>
-            <a href="/dashboard" className="px-6 py-3 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition-colors border border-white/10">
-              لوحة التحكم
+            <a href="/review" className="px-5 py-3 bg-red-600/20 text-red-300 rounded-xl font-bold hover:bg-red-600/30 transition-colors border border-red-500/20">
+              🔄 مراجعة أخطاء
+            </a>
+            <a href="/analytics" className="px-5 py-3 bg-white/10 text-indigo-300 rounded-xl font-bold hover:bg-white/15 transition-colors border border-white/10">
+              📊 تحليلات
+            </a>
+            <a href="/challenge" className="px-5 py-3 bg-white/10 text-indigo-300 rounded-xl font-bold hover:bg-white/15 transition-colors border border-white/10">
+              ⚔️ تحدي
             </a>
           </div>
         </div>

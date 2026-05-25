@@ -24,13 +24,15 @@ export default function AnalyticsPage() {
   const a = getPerformanceAnalytics(user);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950">
-      <header className="bg-black/20 backdrop-blur border-b border-white/10 px-4 py-4 flex items-center gap-3">
-        <a href="/dashboard" className="text-indigo-300 hover:text-white transition-colors">→</a>
-        <h1 className="text-xl font-bold text-white">📊 تحليل الأداء</h1>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div className="p-4 md:p-6">
+      <main className="max-w-4xl mx-auto space-y-5">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-white">📊 تحليل الأداء</h1>
+          <div className="flex gap-2">
+            <a href="/report" className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-indigo-300 rounded-lg text-xs transition-all">📋 تقرير</a>
+            <a href="/brain-map" className="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-indigo-300 rounded-lg text-xs transition-all">🧠 خريطة</a>
+          </div>
+        </div>
         {a.totalSessions === 0 ? (
           <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
             <span className="text-5xl block mb-4">📊</span>
@@ -157,6 +159,21 @@ export default function AnalyticsPage() {
                   <p className="text-xs text-indigo-300">ثانية/سؤال</p>
                 </div>
               </div>
+            </div>
+            {/* Quick links */}
+            <div className="grid grid-cols-3 gap-3">
+              <a href="/practice" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">🎯</span>
+                <span className="text-indigo-300 text-xs">تدريب</span>
+              </a>
+              <a href="/review" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">🔄</span>
+                <span className="text-indigo-300 text-xs">مراجعة أخطاء</span>
+              </a>
+              <a href="/study-plan" className="bg-white/5 hover:bg-white/10 rounded-xl py-3 text-center border border-white/5 transition-all">
+                <span className="text-lg block">📅</span>
+                <span className="text-indigo-300 text-xs">خطة دراسية</span>
+              </a>
             </div>
           </>
         )}

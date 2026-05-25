@@ -7,8 +7,8 @@ import { findWaitingRoom, createRoom, joinRoom, getRoom, submitAnswer, subscribe
 import type { ChallengeRoom } from "@/lib/supabase-api";
 import { generateQuestions } from "@/lib/question-generator";
 import type { QudratQuestion } from "@/data/qudrat-questions";
-import { getLeague } from "@/lib/league-system";
-import { getPerformanceAnalytics } from "@/lib/user-store";
+import { getLeague, simulateOpponentAnswer } from "@/lib/league-system";
+import { getPerformanceAnalytics, addSessionRecord } from "@/lib/user-store";
 import { playCorrectSound, playWrongSound, launchConfetti, playChallengeWinSound } from "@/lib/effects";
 
 type Phase = "lobby" | "searching" | "countdown" | "battle" | "result";
@@ -29,24 +29,59 @@ export default function RealChallengePage() {
   const [opponentName, setOpponentName] = useState("...");
   const [searchTime, setSearchTime] = useState(0);
   const [questions, setQuestions] = useState<QudratQuestion[]>([]);
+  const [isAiFallback, setIsAiFallback] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelRef = useRef<ReturnType<typeof subscribeToRoom> | null>(null);
+  const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [loading, user, router]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (searchTimerRef.current) clearInterval(searchTimerRef.current);
       if (channelRef.current) channelRef.current.unsubscribe();
+      if (aiTimerRef.current) clearTimeout(aiTimerRef.current);
     };
   }, []);
 
+  function startAiFallback(qs: QudratQuestion[]) {
+    setIsAiFallback(true);
+    setPhase("countdown");
+    let c = 3;
+    setCountdown(c);
+    const ci = setInterval(() => {
+      c--;
+      setCountdown(c);
+      if (c <= 0) {
+        clearInterval(ci);
+        setPhase("battle");
+        setCurrentQ(0);
+        setSelected(null);
+        setShowResult(false);
+        setMyScore(0);
+        setOpponentScore(0);
+      }
+    }, 1000);
+  }
+
   const startSearch = useCallback(async () => {
-    if (!user || !isSupabaseConfigured()) {
-      router.push("/challenge");
+    if (!user) return;
+
+    if (!isSupabaseConfigured()) {
+      setPhase("searching");
+      setSearchTime(0);
+      const qs = generateQuestions(10, section as "kamy" | "lafzy" | "both");
+      setQuestions(qs);
+      let t = 0;
+      const si = setInterval(() => { t++; setSearchTime(t); }, 1000);
+      searchTimerRef.current = si;
+      setTimeout(() => {
+        clearInterval(si);
+        setOpponentName("خصم AI");
+        startAiFallback(qs);
+      }, 3000 + Math.random() * 4000);
       return;
     }
 
@@ -134,7 +169,8 @@ export default function RealChallengePage() {
   }
 
   async function handleAnswer(idx: number) {
-    if (selected !== null || !room || !user) return;
+    if (selected !== null || !user) return;
+    if (!isAiFallback && !room) return;
     setSelected(idx);
     setShowResult(true);
 
@@ -148,7 +184,12 @@ export default function RealChallengePage() {
       playWrongSound();
     }
 
-    await submitAnswer(room.id, playerNum, idx, isCorrect);
+    if (isAiFallback) {
+      const aiResult = simulateOpponentAnswer({ id: "ai", name: "خصم AI", avatar: "🤖", personality: "ذكي", league: "silver", accuracy: 0.6, speed: 18, catchphrase: "", description: "" });
+      if (aiResult.correct) setOpponentScore((s) => s + 1);
+    } else if (room) {
+      await submitAnswer(room.id, playerNum, idx, isCorrect);
+    }
 
     setTimeout(() => {
       if (currentQ + 1 < questions.length) {
@@ -156,7 +197,23 @@ export default function RealChallengePage() {
         setSelected(null);
         setShowResult(false);
       } else {
-        finishBattle();
+        if (isAiFallback) {
+          addSessionRecord({
+            session_id: crypto.randomUUID(),
+            category: "تحدي أقران (AI)",
+            total_questions: questions.length,
+            correct_count: myScore + (isCorrect ? 1 : 0),
+            total_time_seconds: 0,
+            date: new Date().toISOString(),
+          });
+          setPhase("result");
+          if ((myScore + (isCorrect ? 1 : 0)) > opponentScore) {
+            launchConfetti(4000);
+            playChallengeWinSound();
+          }
+        } else {
+          finishBattle();
+        }
       }
     }, 1500);
   }
@@ -239,7 +296,11 @@ export default function RealChallengePage() {
             🔍 ابحث عن خصم حقيقي
           </button>
 
-          <p className="text-indigo-400 text-xs text-center mt-4">سيتم مطابقتك مع لاعب يبحث أيضاً عن تحدي</p>
+          <p className="text-indigo-400 text-xs text-center mt-4">
+            {isSupabaseConfigured()
+              ? "سيتم مطابقتك مع لاعب يبحث أيضاً عن تحدي"
+              : "سيتم مطابقتك مع خصم ذكي — التحدي الحقيقي متاح عند ربط قاعدة البيانات"}
+          </p>
         </div>
       </div>
     );
@@ -386,7 +447,7 @@ export default function RealChallengePage() {
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => { setPhase("lobby"); setRoom(null); }} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all">
+            <button onClick={() => { setPhase("lobby"); setRoom(null); setIsAiFallback(false); }} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all">
               🔄 تحدي جديد
             </button>
             <a href="/leaderboard" className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-indigo-300 rounded-xl font-bold text-center transition-all">
