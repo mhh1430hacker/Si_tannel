@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import ObservationalNudge from "@/components/ObservationalNudge";
+import { addSessionRecord } from "@/lib/user-store";
 
 interface Choice {
   id: number;
@@ -161,6 +162,15 @@ export default function TestLab() {
       if (res.ok) {
         const data: SessionSummary = await res.json();
         setSummary(data);
+        // Save to user store for analytics
+        addSessionRecord({
+          session_id: data.session_id,
+          category: category,
+          total_questions: data.total_questions,
+          correct_count: data.correct_count,
+          total_time_seconds: data.total_time_seconds,
+          date: new Date().toISOString(),
+        });
       }
     } catch {
       // Graceful degradation: summary failure doesn't break the app
@@ -217,12 +227,20 @@ export default function TestLab() {
             الوقت الإجمالي: {Math.floor(summary.total_time_seconds / 60)} دقيقة و{" "}
             {summary.total_time_seconds % 60} ثانية
           </div>
-          <a
-            href="/"
-            className="inline-block py-3 px-8 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            العودة للرئيسية
-          </a>
+          <div className="flex gap-3 justify-center">
+            <a
+              href="/dashboard"
+              className="inline-block py-3 px-8 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              لوحة التحكم
+            </a>
+            <a
+              href="/analytics"
+              className="inline-block py-3 px-6 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+            >
+              تحليل الأداء
+            </a>
+          </div>
         </div>
       </main>
     );
