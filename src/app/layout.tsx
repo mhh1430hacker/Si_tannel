@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "معمل قدرات - Ainex",
-  description: "منصة تكيفية لاختبارات القدرات",
+  description: "منصة ذكية للتدريب على اختبارات القدرات — ذكاء اصطناعي مدمج، تحليل أداء، بطاقات تعليمية",
 };
 
 export default function RootLayout({
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className="bg-gray-50 text-gray-900 min-h-screen antialiased">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
