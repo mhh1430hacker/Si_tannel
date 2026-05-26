@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { QUDRAT_SECTIONS } from "@/data/qudrat-questions";
 import type { QudratQuestion } from "@/data/qudrat-questions";
 import { addSessionRecord } from "@/lib/user-store";
-import DonationCTA from "@/components/DonationCTA";
+
 
 type ExamPhase = "setup" | "running" | "review";
 
@@ -132,7 +132,7 @@ export default function ExamPage() {
   }
 
   if (loading || !user) {
-    return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-indigo-950"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;
+    return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;
   }
 
   const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
@@ -140,19 +140,19 @@ export default function ExamPage() {
   // Setup phase
   if (phase === "setup") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
-        <div className="max-w-lg mx-auto pt-12">
-          <a href="/dashboard" className="text-indigo-300 hover:text-white text-sm mb-6 inline-block">→ العودة</a>
-          <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-8">
-            <h1 className="text-2xl font-bold text-white mb-6 text-center">📝 اختبار محاكي</h1>
-            <p className="text-indigo-200 text-sm text-center mb-8">يحاكي الاختبار الحقيقي بتوقيت وعدد أسئلة محدد</p>
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="max-w-lg mx-auto">
+          <a href="/dashboard" className="text-indigo-400 hover:text-white text-xs mb-6 inline-block">→ العودة</a>
+          <div className="bg-white/[0.07] backdrop-blur rounded-2xl border border-white/10 p-6 md:p-8">
+            <h1 className="text-xl font-bold text-white mb-2 text-center">اختبار محاكي</h1>
+            <p className="text-indigo-300/60 text-sm text-center mb-8">يحاكي الاختبار الحقيقي بتوقيت وعدد أسئلة محدد</p>
 
             <div className="space-y-6">
               <div>
                 <label className="text-indigo-200 text-sm mb-2 block">القسم</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {([["both", "كمي + لفظي"], ["kamy", "📐 كمي"], ["lafzy", "📖 لفظي"]] as const).map(([id, label]) => (
-                    <button key={id} onClick={() => setSection(id)} className={`py-2.5 rounded-lg text-sm transition-all ${section === id ? "bg-indigo-600 text-white" : "bg-white/10 text-indigo-300 hover:bg-white/20"}`}>
+                <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+                  {([["both", "كمي + لفظي"], ["kamy", "كمي"], ["lafzy", "لفظي"]] as const).map(([id, label]) => (
+                    <button key={id} onClick={() => setSection(id)} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${section === id ? "bg-indigo-600 text-white" : "text-indigo-300/70 hover:text-white"}`}>
                       {label}
                     </button>
                   ))}
@@ -182,7 +182,7 @@ export default function ExamPage() {
               </div>
             </div>
 
-            <button onClick={startExam} className="w-full mt-8 py-4 bg-gradient-to-l from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all">
+            <button onClick={startExam} className="w-full mt-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all active:scale-[0.98]">
               ابدأ الاختبار
             </button>
           </div>
@@ -202,11 +202,11 @@ export default function ExamPage() {
     const predictedScore = Math.round(40 + (accuracy / 100) * 60);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
-        <div className="max-w-2xl mx-auto pt-8">
-          <h1 className="text-2xl font-bold text-white text-center mb-2 animate-fade-in">📋 نتيجة الاختبار المحاكي</h1>
-          <p className="text-indigo-300 text-center text-sm mb-8 animate-fade-in">
-            {accuracy >= 80 ? "أداء رائع! أنت من أفضل الطلاب 🌟" : accuracy >= 60 ? "أداء جيد! بتدريب إضافي بسيط ستصل للتميّز 💪" : accuracy >= 40 ? "بداية موفقة! أغلب الطلاب يحتاجون عدة محاولات للتحسّن 🚀" : "كل خبير كان مبتدئاً يوماً! استمر وستلاحظ الفرق ✨"}
+      <div className="p-4 md:p-6 lg:p-8">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-xl font-bold text-white text-center mb-2">نتيجة الاختبار</h1>
+          <p className="text-indigo-300/70 text-center text-sm mb-8">
+            {accuracy >= 80 ? "أداء رائع — أنت من أفضل الطلاب" : accuracy >= 60 ? "أداء جيد — بتدريب إضافي ستصل للتميّز" : accuracy >= 40 ? "بداية موفقة — أغلب الطلاب يحتاجون عدة محاولات" : "كل خبير كان مبتدئاً — استمر وستلاحظ الفرق"}
           </p>
 
           {/* Score circle */}
@@ -262,21 +262,18 @@ export default function ExamPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center mb-6">
-            <button onClick={() => { setPhase("setup"); setAnswers([]); }} className="px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
-              📝 اختبار جديد
+            <button onClick={() => { setPhase("setup"); setAnswers([]); }} className="px-5 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-all">
+              اختبار جديد
             </button>
-            <a href="/review" className="px-5 py-3 bg-red-600/20 text-red-300 rounded-xl font-bold hover:bg-red-600/30 transition-colors border border-red-500/20">
-              🔄 مراجعة أخطاء
+            <a href="/review" className="px-5 py-3 bg-white/5 text-indigo-300 rounded-xl text-sm hover:bg-white/10 transition-all border border-white/5">
+              مراجعة أخطاء
             </a>
-            <a href="/analytics" className="px-5 py-3 bg-white/10 text-indigo-300 rounded-xl font-bold hover:bg-white/15 transition-colors border border-white/10">
-              📊 تحليلات
-            </a>
-            <a href="/challenge" className="px-5 py-3 bg-white/10 text-indigo-300 rounded-xl font-bold hover:bg-white/15 transition-colors border border-white/10">
-              ⚔️ تحدي
+            <a href="/analytics" className="px-5 py-3 bg-white/5 text-indigo-300 rounded-xl text-sm hover:bg-white/10 transition-all border border-white/5">
+              تحليلات
             </a>
           </div>
 
-          <DonationCTA variant="banner" />
+
         </div>
       </div>
     );
@@ -288,10 +285,10 @@ export default function ExamPage() {
   const progress = ((currentQ + 1) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
+    <div className="p-4 md:p-6 lg:p-8">
       <div className="max-w-2xl mx-auto">
         {/* Timer bar */}
-        <div className="sticky top-0 bg-black/40 backdrop-blur rounded-2xl p-3 mb-6 border border-white/10 z-10">
+        <div className="sticky top-0 bg-black/40 backdrop-blur rounded-2xl p-3 mb-6 border border-white/5 z-10">
           <div className="flex items-center justify-between mb-2">
             <span className="text-indigo-300 text-sm">{currentQ + 1} / {questions.length}</span>
             <span className={`font-mono font-bold text-lg ${timeWarning ? "text-red-400 animate-pulse" : "text-white"}`}>
@@ -305,8 +302,8 @@ export default function ExamPage() {
         </div>
 
         {/* Question */}
-        <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-6 mb-4">
-          <p className="text-white text-lg leading-relaxed">{q.text}</p>
+        <div className="bg-white/[0.07] backdrop-blur rounded-2xl border border-white/10 p-6 mb-5">
+          <p className="text-white text-base leading-relaxed">{q.text}</p>
         </div>
 
         {/* Choices */}

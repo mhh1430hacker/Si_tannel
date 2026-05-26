@@ -219,6 +219,7 @@ export function getPerformanceAnalytics(data: UserData) {
   // Category breakdown
   const catMap = new Map<string, { questions: number; correct: number; time: number; sessions: number }>();
   for (const s of sessions) {
+    if (!s.category || !s.category.trim()) continue;
     const prev = catMap.get(s.category) || { questions: 0, correct: 0, time: 0, sessions: 0 };
     catMap.set(s.category, {
       questions: prev.questions + s.total_questions,
