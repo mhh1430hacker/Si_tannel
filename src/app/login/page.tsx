@@ -29,15 +29,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-900 to-indigo-900 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-600/30 backdrop-blur mb-4">
-            <span className="text-4xl">🧠</span>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">معمل قدرات</h1>
-          <p className="text-indigo-200 text-sm">منصة ذكية للتدريب على اختبارات القدرات</p>
+          <h1 className="text-2xl font-bold text-white mb-2">معمل قدرات</h1>
+          <p className="text-indigo-200/60 text-sm">سجّل للبدء بالتدريب</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-          <h2 className="text-xl font-bold text-white mb-6 text-center">تسجيل الدخول</h2>
+        <form onSubmit={handleSubmit} className="bg-white/[0.07] backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-white/10">
 
           {error && (
             <div className="bg-red-500/20 border border-red-400/30 text-red-200 text-sm rounded-lg p-3 mb-4 text-center">
