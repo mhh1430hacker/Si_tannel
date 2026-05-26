@@ -130,18 +130,18 @@ export default function PracticePage() {
         {/* Header */}
         <div className="text-center mb-1">
           <h1 className="text-xl font-bold text-white">تدريب حر</h1>
-          <p className="text-indigo-400/60 text-xs">سؤال {stats.correct + stats.wrong + 1} من {questions.length}</p>
+          <p className="text-indigo-300/70 text-xs">سؤال {stats.correct + stats.wrong + 1} من {questions.length}</p>
         </div>
 
         {/* AI Stats Bar */}
         <div className="flex items-center justify-center gap-4 mb-4 text-[10px]">
-          <span className="text-indigo-300/50">{stats.correct} صح</span>
-          <span className="text-indigo-300/30">|</span>
-          <span className="text-indigo-300/50">{stats.wrong} خطأ</span>
-          <span className="text-indigo-300/30">|</span>
-          <span className="text-indigo-300/50">Elo: {Math.round(eloRating)}</span>
-          <span className="text-indigo-300/30">|</span>
-          <span className="text-indigo-300/50">المستوى: {abilityLabel}</span>
+          <span className="text-indigo-300/70">{stats.correct} صح</span>
+          <span className="text-indigo-300/40">|</span>
+          <span className="text-indigo-300/70">{stats.wrong} خطأ</span>
+          <span className="text-indigo-300/40">|</span>
+          <span className="text-indigo-300/70">Elo: {Math.round(eloRating)}</span>
+          <span className="text-indigo-300/40">|</span>
+          <span className="text-indigo-300/70">المستوى: {abilityLabel}</span>
         </div>
 
         {/* Section toggle */}
@@ -161,7 +161,7 @@ export default function PracticePage() {
 
         {/* AI Reason */}
         {aiReason && (
-          <p className="text-indigo-400/40 text-[10px] text-center mb-3">{aiReason}</p>
+          <p className="text-indigo-400/60 text-[10px] text-center mb-3">{aiReason}</p>
         )}
 
         {/* Question card */}

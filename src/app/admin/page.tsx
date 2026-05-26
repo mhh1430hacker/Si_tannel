@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import { QUDRAT_SECTIONS, QudratQuestion } from "@/data/qudrat-questions";
 import { getAllUsers, AdminUserData } from "@/lib/supabase-api";
 
-// Admin credentials (hardcoded for now — production should use env vars)
-const ADMIN_EMAIL = "admin@ainex.com";
-const ADMIN_PASS = "admin123";
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@ainex.com";
+const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASS || "admin123";
 
 type Tab = "overview" | "users" | "questions" | "challenges" | "rewards" | "settings";
 

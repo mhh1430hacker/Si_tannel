@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getPerformanceAnalytics } from "@/lib/user-store";
 import { getDailyMotivation } from "@/lib/ai-tutor";
 import { getLeague, getLeagueProgress, getNextLeague } from "@/lib/league-system";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -24,11 +25,7 @@ export default function Dashboard() {
   }, [loading, user, router]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-indigo-300 text-lg">جارٍ التحميل...</div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   const analytics = getPerformanceAnalytics(user);
@@ -137,10 +134,10 @@ export default function Dashboard() {
               <div key={cat.category} className="bg-white/5 rounded-xl p-4 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-white text-sm font-medium">{cat.category}</span>
-                  <span className={`text-sm font-bold ${cat.accuracy >= 70 ? "text-green-400" : cat.accuracy >= 50 ? "text-amber-400" : "text-red-400"}`}>{cat.accuracy}٪</span>
+                  <span className={`text-sm font-bold ${cat.accuracy === 0 ? "text-indigo-300" : cat.accuracy >= 70 ? "text-green-400" : cat.accuracy >= 50 ? "text-amber-400" : "text-amber-400"}`}>{cat.accuracy}٪</span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-1.5">
-                  <div className={`h-1.5 rounded-full transition-all ${cat.accuracy >= 70 ? "bg-green-500" : cat.accuracy >= 50 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${cat.accuracy}%` }} />
+                  <div className={`h-1.5 rounded-full transition-all ${cat.accuracy >= 70 ? "bg-green-500" : cat.accuracy >= 50 ? "bg-amber-500" : "bg-indigo-500"}`} style={{ width: `${Math.max(cat.accuracy, 2)}%` }} />
                 </div>
               </div>
             ))}

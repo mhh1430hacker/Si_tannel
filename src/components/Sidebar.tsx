@@ -33,11 +33,11 @@ const MORE_ITEMS = [
 ];
 
 const BOTTOM_NAV = [
-  { href: "/dashboard", label: "الرئيسية" },
-  { href: "/practice", label: "تدريب" },
-  { href: "/exam", label: "اختبار" },
-  { href: "/analytics", label: "تحليل" },
-  { href: "/profile", label: "حسابي" },
+  { href: "/dashboard", label: "الرئيسية", icon: "🏠" },
+  { href: "/practice", label: "تدريب", icon: "📝" },
+  { href: "/exam", label: "اختبار", icon: "⏱" },
+  { href: "/analytics", label: "تحليل", icon: "📊" },
+  { href: "/profile", label: "حسابي", icon: "👤" },
 ];
 
 export default function Sidebar({ children }: { children: React.ReactNode }) {
@@ -47,7 +47,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  const publicPages = ["/", "/login", "/register", "/forgot-password", "/admin"];
+  const publicPages = ["/", "/login", "/register", "/forgot-password", "/admin", "/onboarding"];
   if (!user || publicPages.includes(pathname)) return <>{children}</>;
 
   const league = getLeague(user.total_points);
@@ -224,7 +224,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                   isActive(item.href) ? "text-white" : "text-indigo-300/50"
                 }`}
               >
-                <span className={`text-xs font-medium ${isActive(item.href) ? "text-white" : ""}`}>{item.label}</span>
+                <span className="text-base">{item.icon}</span>
+                <span className={`text-[10px] font-medium ${isActive(item.href) ? "text-white" : ""}`}>{item.label}</span>
               </a>
             ))}
           </div>

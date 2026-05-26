@@ -40,21 +40,28 @@ export default function ExamPage() {
     if (!loading && !user) router.push("/login");
   }, [loading, user, router]);
 
-  const endExam = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    // Save session
-    const correct = answers.filter((a) => a.isCorrect).length;
-    const totalTime = answers.reduce((s, a) => s + a.timeSpent, 0);
+  const savedRef = useRef(false);
+
+  const saveSession = useCallback((finalAnswers: ExamAnswer[]) => {
+    if (savedRef.current) return;
+    savedRef.current = true;
+    const correct = finalAnswers.filter((a) => a.isCorrect).length;
+    const totalTime = finalAnswers.reduce((s, a) => s + a.timeSpent, 0);
     addSessionRecord({
       session_id: crypto.randomUUID(),
       category: section === "kamy" ? "كمي — الرياضيات" : section === "lafzy" ? "لفظي — اللغة العربية" : "كمي + لفظي",
-      total_questions: answers.length,
+      total_questions: finalAnswers.length,
       correct_count: correct,
       total_time_seconds: totalTime,
       date: new Date().toISOString(),
     });
+  }, [section]);
+
+  const endExam = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    saveSession(answers);
     setPhase("review");
-  }, [answers, section]);
+  }, [answers, saveSession]);
 
   useEffect(() => {
     if (phase !== "running") return;
@@ -88,6 +95,7 @@ export default function ExamPage() {
     setSelected(null);
     setTimeLeft(timeLimitMin * 60);
     setQStartTime(Date.now());
+    savedRef.current = false;
     setPhase("running");
   }
 
@@ -99,18 +107,8 @@ export default function ExamPage() {
     setAnswers(newAnswers);
 
     if (currentQ + 1 >= questions.length) {
-      // Update answers before ending
-      const correct = newAnswers.filter((a) => a.isCorrect).length;
-      const totalTime = newAnswers.reduce((s, a) => s + a.timeSpent, 0);
       if (timerRef.current) clearInterval(timerRef.current);
-      addSessionRecord({
-        session_id: crypto.randomUUID(),
-        category: section === "kamy" ? "كمي — الرياضيات" : section === "lafzy" ? "لفظي — اللغة العربية" : "كمي + لفظي",
-        total_questions: newAnswers.length,
-        correct_count: correct,
-        total_time_seconds: totalTime,
-        date: new Date().toISOString(),
-      });
+      saveSession(newAnswers);
       setPhase("review");
     } else {
       setCurrentQ((c) => c + 1);
@@ -205,7 +203,7 @@ export default function ExamPage() {
       <div className="p-4 md:p-6 lg:p-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-xl font-bold text-white text-center mb-2">نتيجة الاختبار</h1>
-          <p className="text-indigo-300/70 text-center text-sm mb-8">
+          <p className="text-indigo-200/80 text-center text-sm mb-8">
             {accuracy >= 80 ? "أداء رائع — أنت من أفضل الطلاب" : accuracy >= 60 ? "أداء جيد — بتدريب إضافي ستصل للتميّز" : accuracy >= 40 ? "بداية موفقة — أغلب الطلاب يحتاجون عدة محاولات" : "كل خبير كان مبتدئاً — استمر وستلاحظ الفرق"}
           </p>
 

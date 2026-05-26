@@ -53,7 +53,7 @@ export default function Home() {
           <br />
           <span className="text-indigo-400">بأذكى طريقة</span>
         </h1>
-        <p className="text-indigo-200/60 text-base md:text-lg max-w-xl mx-auto mb-8 leading-relaxed">
+        <p className="text-indigo-200/80 text-base md:text-lg max-w-xl mx-auto mb-8 leading-relaxed">
           اختبارات محاكية، تحليل أداء، تحدي أقران، وخطة دراسية مخصصة — كل ما تحتاجه في مكان واحد
         </p>
         <div className="flex items-center justify-center gap-3">
@@ -82,7 +82,7 @@ export default function Home() {
           ].map((stat, i) => (
             <div key={i} className="bg-white/5 rounded-xl p-4 border border-white/5 text-center">
               <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-indigo-400/60 text-xs mt-1">{stat.label}</p>
+              <p className="text-indigo-300/80 text-xs mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -100,7 +100,7 @@ export default function Home() {
           ].map((f, i) => (
             <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-5 hover:bg-white/[0.07] transition-all">
               <h3 className="text-white font-bold text-sm mb-1">{f.title}</h3>
-              <p className="text-indigo-300/50 text-xs leading-relaxed">{f.desc}</p>
+              <p className="text-indigo-300/70 text-xs leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -109,8 +109,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-white/5 px-4 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <span className="text-indigo-400/40 text-xs">معمل قدرات</span>
-          <a href="https://buymeacoffee.com/khalas" target="_blank" rel="noopener noreferrer" className="text-indigo-400/40 hover:text-indigo-300 text-xs transition-colors">
+          <span className="text-indigo-400/60 text-xs">معمل قدرات</span>
+          <a href="https://buymeacoffee.com/khalas" target="_blank" rel="noopener noreferrer" className="text-indigo-400/60 hover:text-indigo-300 text-xs transition-colors">
             ادعم المطور
           </a>
         </div>
