@@ -1,22 +1,27 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { UserData, getUserData, createUser, logoutUser, getPerformanceAnalytics } from "@/lib/user-store";
+import { UserData, getUserData, saveUserData, createUser, logoutUser, getPerformanceAnalytics } from "@/lib/user-store";
 import { syncUserToSupabase, isSupabaseConfigured } from "@/lib/supabase-api";
 import { getLeague } from "@/lib/league-system";
+import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from "@/lib/supabase-auth";
 
 interface AuthContextValue {
   user: UserData | null;
+  authUser: AuthUser | null;
   loading: boolean;
   login: (name: string, email: string) => void;
+  loginWithAuth: (authUser: AuthUser) => void;
   logout: () => void;
   refresh: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
+  authUser: null,
   loading: true,
   login: () => {},
+  loginWithAuth: () => {},
   logout: () => {},
   refresh: () => {},
 });
@@ -24,6 +29,8 @@ const AuthContext = createContext<AuthContextValue>({
 export function useAuth() {
   return useContext(AuthContext);
 }
+
+const AVATAR_COLORS = ["#6366f1", "#ec4899", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#14b8a6"];
 
 function syncToCloud(data: UserData) {
   if (!isSupabaseConfigured()) return;
@@ -47,15 +54,80 @@ function syncToCloud(data: UserData) {
   }).catch(() => {});
 }
 
+function ensureLocalData(authUser: AuthUser): UserData {
+  const existing = getUserData();
+  if (existing) {
+    if (existing.profile.id !== authUser.id) {
+      existing.profile.id = authUser.id;
+      existing.profile.email = authUser.email;
+      if (authUser.name) existing.profile.name = authUser.name;
+      saveUserData(existing);
+    }
+    return existing;
+  }
+
+  const data: UserData = {
+    profile: {
+      id: authUser.id,
+      name: authUser.name || authUser.email.split("@")[0],
+      email: authUser.email,
+      created_at: new Date().toISOString(),
+      avatar_color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
+    },
+    sessions: [],
+    achievements: [],
+    flashcards: [],
+    streak: { current: 0, longest: 0, last_study_date: "" },
+    total_points: 0,
+    study_minutes_today: 0,
+    last_active: new Date().toISOString(),
+  };
+  saveUserData(data);
+  return data;
+}
+
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const data = getUserData();
-    setUser(data);
-    setLoading(false);
-    if (data) syncToCloud(data);
+    let cancelled = false;
+
+    async function init() {
+      const supabaseUser = await getCurrentUser();
+      if (cancelled) return;
+
+      if (supabaseUser) {
+        setAuthUser(supabaseUser);
+        const data = ensureLocalData(supabaseUser);
+        setUser(data);
+        syncToCloud(data);
+      } else {
+        const localData = getUserData();
+        if (localData) setUser(localData);
+      }
+      setLoading(false);
+    }
+
+    init();
+
+    const unsub = onAuthStateChange((au) => {
+      if (cancelled) return;
+      if (au) {
+        setAuthUser(au);
+        const data = ensureLocalData(au);
+        setUser(data);
+        syncToCloud(data);
+      } else {
+        setAuthUser(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      if (unsub) unsub();
+    };
   }, []);
 
   const login = (name: string, email: string) => {
@@ -64,9 +136,18 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     syncToCloud(data);
   };
 
-  const logout = () => {
+  const loginWithAuth = (au: AuthUser) => {
+    setAuthUser(au);
+    const data = ensureLocalData(au);
+    setUser(data);
+    syncToCloud(data);
+  };
+
+  const logout = async () => {
+    await signOut();
     logoutUser();
     setUser(null);
+    setAuthUser(null);
   };
 
   const refresh = () => {
@@ -76,7 +157,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refresh }}>
+    <AuthContext.Provider value={{ user, authUser, loading, login, loginWithAuth, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   );
