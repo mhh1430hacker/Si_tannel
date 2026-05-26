@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { QUDRAT_SECTIONS } from "@/data/qudrat-questions";
 import type { QudratQuestion } from "@/data/qudrat-questions";
 import { addSessionRecord } from "@/lib/user-store";
+import { syncToCloud } from "@/lib/local-sync";
 
 
 type ExamPhase = "setup" | "running" | "review";
@@ -55,6 +56,8 @@ export default function ExamPage() {
       total_time_seconds: totalTime,
       date: new Date().toISOString(),
     });
+    // Trigger cloud sync after session completion
+    syncToCloud().catch(() => {});
   }, [section]);
 
   const endExam = useCallback(() => {

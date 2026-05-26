@@ -5,6 +5,7 @@ import { UserData, getUserData, saveUserData, createUser, logoutUser, getPerform
 import { syncUserToSupabase, isSupabaseConfigured } from "@/lib/supabase-api";
 import { getLeague } from "@/lib/league-system";
 import { getCurrentUser, onAuthStateChange, signOut, AuthUser } from "@/lib/supabase-auth";
+import { startAutoSync, syncToCloud as syncToNeon } from "@/lib/local-sync";
 
 interface AuthContextValue {
   user: UserData | null;
@@ -124,9 +125,15 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    // Start local-first auto-sync to Neon Postgres
+    const stopSync = startAutoSync();
+    // Initial sync
+    syncToNeon().catch(() => {});
+
     return () => {
       cancelled = true;
       if (unsub) unsub();
+      stopSync();
     };
   }, []);
 
