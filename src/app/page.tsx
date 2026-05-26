@@ -36,9 +36,14 @@ export default function Home() {
       {/* Header */}
       <header className="px-4 py-4 flex items-center justify-between max-w-4xl mx-auto">
         <span className="text-white font-bold text-sm">معمل قدرات</span>
-        <a href="/login" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all">
-          دخول
-        </a>
+        <div className="flex items-center gap-2">
+          <a href="/login" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-all border border-white/10">
+            دخول
+          </a>
+          <a href="/register" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all">
+            إنشاء حساب
+          </a>
+        </div>
       </header>
 
       {/* Hero */}
@@ -51,12 +56,20 @@ export default function Home() {
         <p className="text-indigo-200/60 text-base md:text-lg max-w-xl mx-auto mb-8 leading-relaxed">
           اختبارات محاكية، تحليل أداء، تحدي أقران، وخطة دراسية مخصصة — كل ما تحتاجه في مكان واحد
         </p>
-        <a
-          href="/login"
-          className="inline-block px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-lg transition-all active:scale-[0.98]"
-        >
-          ابدأ مجاناً
-        </a>
+        <div className="flex items-center justify-center gap-3">
+          <a
+            href="/register"
+            className="inline-block px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-lg transition-all active:scale-[0.98]"
+          >
+            ابدأ مجاناً
+          </a>
+          <a
+            href="/login"
+            className="inline-block px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-bold text-lg transition-all border border-white/10"
+          >
+            لدي حساب
+          </a>
+        </div>
       </div>
 
       {/* Stats */}

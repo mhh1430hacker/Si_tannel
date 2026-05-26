@@ -47,7 +47,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  if (!user || pathname === "/admin") return <>{children}</>;
+  const publicPages = ["/", "/login", "/register", "/forgot-password", "/admin"];
+  if (!user || publicPages.includes(pathname)) return <>{children}</>;
 
   const league = getLeague(user.total_points);
 
