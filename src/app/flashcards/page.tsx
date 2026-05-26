@@ -54,11 +54,7 @@ export default function FlashcardsPage() {
   }
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-indigo-950">
-        <div className="animate-pulse text-indigo-300">جارٍ التحميل...</div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-indigo-300">جارٍ التحميل...</div></div>;
   }
 
   const card = cards[currentIndex];
@@ -77,16 +73,12 @@ export default function FlashcardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950">
-      <header className="bg-black/20 backdrop-blur border-b border-white/10 px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <a href="/dashboard" className="text-indigo-300 hover:text-white transition-colors">→</a>
-          <h1 className="text-xl font-bold text-white">📇 البطاقات التعليمية</h1>
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-white">البطاقات التعليمية</h1>
+          <span className="text-indigo-300/70 text-sm">{remaining} متبقية</span>
         </div>
-        <span className="text-indigo-300 text-sm">{remaining} متبقية</span>
-      </header>
-
-      <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Mode selector */}
         <div className="flex gap-2 justify-center mb-8">
           {[
@@ -181,7 +173,7 @@ export default function FlashcardsPage() {
             </button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

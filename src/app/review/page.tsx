@@ -128,7 +128,8 @@ export default function ReviewPage() {
 
           {wrongQuestions.length === 0 ? (
             <div className="bg-white/[0.04] rounded-2xl p-12 border border-white/10 text-center">
-              <h2 className="text-lg font-bold text-white mb-2">لا توجد أخطاء</h2>
+              <div className="text-4xl mb-4">🎉</div>
+              <h2 className="text-lg font-bold text-white mb-2">ممتاز — لا أخطاء حالياً!</h2>
               <p className="text-indigo-300/60 text-sm mb-6">أجبت على جميع الأسئلة بشكل صحيح</p>
               <a href="/practice" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
                 تدريب جديد

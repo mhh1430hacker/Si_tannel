@@ -90,11 +90,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <a href="/dashboard" className="text-indigo-300 hover:text-white text-sm">→ العودة</a>
-          <h1 className="text-xl font-bold text-white">⚙️ الإعدادات</h1>
+          <h1 className="text-xl font-bold text-white">الإعدادات</h1>
           {saved && <span className="text-green-400 text-sm animate-pulse">تم الحفظ</span>}
         </div>
 

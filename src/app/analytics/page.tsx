@@ -44,8 +44,10 @@ export default function AnalyticsPage() {
 
         {a.totalSessions === 0 && !aiData?.irtAbility ? (
           <div className="bg-white/5 rounded-2xl p-12 border border-white/10 text-center">
-            <h2 className="text-xl font-bold text-white mb-2">لا توجد بيانات بعد</h2>
-            <p className="text-indigo-300 mb-6">أكمل بعض الأسئلة من التدريب لتظهر التحليلات</p>
+            <div className="text-4xl mb-4">📊</div>
+            <h2 className="text-xl font-bold text-white mb-2">التحليلات في انتظارك!</h2>
+            <p className="text-indigo-200/80 mb-2">بمجرد أن تبدأ التدريب أو الاختبار، ستظهر هنا تحليلات ذكية لأدائك.</p>
+            <p className="text-indigo-300/60 text-sm mb-6">كل الطلاب المتفوقين بدأوا من هنا</p>
             <a href="/practice" className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500 transition-colors">
               ابدأ التدريب
             </a>
@@ -78,7 +80,7 @@ export default function AnalyticsPage() {
                 </div>
                 {/* Score distribution */}
                 <div>
-                  <p className="text-indigo-300/50 text-[10px] mb-2">توزيع احتمالات الدرجة</p>
+                  <p className="text-indigo-300/70 text-[10px] mb-2">توزيع احتمالات الدرجة</p>
                   <div className="flex items-end gap-px h-12">
                     {aiData.scoreDistribution.map((d, i) => (
                       <div key={i} className="flex-1 flex flex-col items-center">
@@ -89,7 +91,7 @@ export default function AnalyticsPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between text-[8px] text-indigo-400/40 mt-1">
+                  <div className="flex justify-between text-[8px] text-indigo-400/60 mt-1">
                     <span>40</span>
                     <span>70</span>
                     <span>100</span>
