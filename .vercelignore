@@ -5,8 +5,8 @@ docker-compose.yml
 .git/
 .vscode/
 .idea/
-node_modules/
 .env
 .env.local
 .env*.local
 frontend/
+README.md
