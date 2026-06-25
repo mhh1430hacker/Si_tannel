@@ -100,6 +100,85 @@ CREATE TABLE IF NOT EXISTS crawled_questions (
   is_approved BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Educational Platform Schema
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  avatar_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = ''
+as $$
+begin
+  insert into public.profiles (id, full_name)
+  values (new.id, null)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+
+CREATE TABLE IF NOT EXISTS public.courses (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid references public.profiles(id),
+  title text not null,
+  description text,
+  is_published boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+CREATE TABLE IF NOT EXISTS public.lessons (
+  id uuid primary key default gen_random_uuid(),
+  course_id uuid not null references public.courses(id) on delete cascade,
+  title text not null,
+  "order" int not null,
+  content jsonb,
+  created_at timestamptz not null default now()
+);
+
+CREATE TABLE IF NOT EXISTS public.progress (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  lesson_id uuid not null references public.lessons(id) on delete cascade,
+  status text not null default 'not_started',
+  percent int not null default 0,
+  last_seen_at timestamptz,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, lesson_id)
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (id = auth.uid());
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK (id = auth.uid());
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING (id = auth.uid()) WITH CHECK (id = auth.uid());
+
+CREATE POLICY "Published courses are readable" ON public.courses FOR SELECT TO authenticated USING (is_published = true);
+CREATE POLICY "Authors can read own courses" ON public.courses FOR SELECT TO authenticated USING (author_id = auth.uid());
+CREATE POLICY "Authors can insert courses" ON public.courses FOR INSERT TO authenticated WITH CHECK (author_id = auth.uid());
+CREATE POLICY "Authors can update courses" ON public.courses FOR UPDATE TO authenticated USING (author_id = auth.uid()) WITH CHECK (author_id = auth.uid());
+CREATE POLICY "Authors can delete courses" ON public.courses FOR DELETE TO authenticated USING (author_id = auth.uid());
+
+CREATE POLICY "Published lessons are readable" ON public.lessons FOR SELECT TO authenticated USING (exists (select 1 from public.courses c where c.id = lessons.course_id and c.is_published = true));
+CREATE POLICY "Authors can manage lessons" ON public.lessons FOR ALL TO authenticated USING (exists (select 1 from public.courses c where c.id = lessons.course_id and c.author_id = auth.uid())) WITH CHECK (exists (select 1 from public.courses c where c.id = lessons.course_id and c.author_id = auth.uid()));
+
+CREATE POLICY "Users can read own progress" ON public.progress FOR SELECT TO authenticated USING (user_id = auth.uid());
+CREATE POLICY "Users can upsert own progress" ON public.progress FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can update own progress" ON public.progress FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can delete own progress" ON public.progress FOR DELETE TO authenticated USING (user_id = auth.uid());
 `;
 
 export async function POST() {
