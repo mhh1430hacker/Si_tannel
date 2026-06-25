@@ -59,27 +59,37 @@ export interface LeaderboardUser {
 
 export async function getLeaderboard(limit = 50): Promise<LeaderboardUser[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("users")
-    .select("id, name, avatar_color, total_points, accuracy, league, streak_current")
-    .gt("total_points", 0)
-    .order("total_points", { ascending: false })
-    .limit(limit);
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, avatar_color, total_points, accuracy, league, streak_current")
+      .gt("total_points", 0)
+      .order("total_points", { ascending: false })
+      .limit(limit);
 
-  if (error || !data) return [];
-  return data.map((u, i) => ({ ...u, rank: i + 1 }));
+    if (error || !data) return [];
+    return data.map((u, i) => ({ ...u, rank: i + 1 }));
+  } catch (err) {
+    console.error("Network/DB error in getLeaderboard:", err);
+    return []; // Graceful fallback
+  }
 }
 
 export async function getUserRank(userId: string): Promise<number> {
   if (!supabase) return 0;
-  const { data } = await supabase
-    .from("users")
-    .select("id")
-    .gt("total_points", 0)
-    .order("total_points", { ascending: false });
-  if (!data) return 0;
-  const idx = data.findIndex((u) => u.id === userId);
-  return idx >= 0 ? idx + 1 : 0;
+  try {
+    const { data } = await supabase
+      .from("users")
+      .select("id")
+      .gt("total_points", 0)
+      .order("total_points", { ascending: false });
+    if (!data) return 0;
+    const idx = data.findIndex((u) => u.id === userId);
+    return idx >= 0 ? idx + 1 : 0;
+  } catch (err) {
+    console.error("Network/DB error in getUserRank:", err);
+    return 0; // Graceful fallback
+  }
 }
 
 // ===== ADMIN: ALL USERS =====
@@ -101,12 +111,17 @@ export interface AdminUserData {
 
 export async function getAllUsers(): Promise<AdminUserData[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("users")
-    .select("*")
-    .order("total_points", { ascending: false });
-  if (error || !data) return [];
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .order("total_points", { ascending: false });
+    if (error || !data) return [];
+    return data;
+  } catch (err) {
+    console.error("Network/DB error in getAllUsers:", err);
+    return []; // Graceful fallback
+  }
 }
 
 // ===== CHALLENGES =====
@@ -282,12 +297,17 @@ export interface Reward {
 
 export async function getAvailableRewards(): Promise<Reward[]> {
   if (!supabase) return [];
-  const { data } = await supabase
-    .from("rewards")
-    .select("*")
-    .eq("is_active", true)
-    .order("points_required", { ascending: true });
-  return (data as Reward[]) || [];
+  try {
+    const { data } = await supabase
+      .from("rewards")
+      .select("*")
+      .eq("is_active", true)
+      .order("points_required", { ascending: true });
+    return (data as Reward[]) || [];
+  } catch (err) {
+    console.error("Network/DB error in getAvailableRewards:", err);
+    return []; // Graceful fallback
+  }
 }
 
 export async function claimReward(userId: string, rewardId: string): Promise<{ success: boolean; message: string; coupon_code?: string }> {

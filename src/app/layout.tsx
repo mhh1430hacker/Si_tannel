@@ -4,10 +4,11 @@ import AuthProvider from "@/components/AuthProvider";
 import Sidebar from "@/components/Sidebar";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "معمل قدرات - Ainex",
-  description: "منصة ذكية للتدريب على اختبارات القدرات — ذكاء اصطناعي مدمج، تحليل أداء، بطاقات تعليمية",
+  title: "أينكس للقدرات | منصة التعليم الذكية",
+  description: "أقوى منصة تعليمية للتدريب على اختبارات القدرات باستخدام خوارزميات الذكاء الاصطناعي — تحليل أداء دقيق، بيئة تنافسية، وخطط مخصصة.",
 };
 
 export const viewport: Viewport = {
@@ -24,14 +25,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className="bg-gray-900 text-gray-100 min-h-screen antialiased">
+    <html lang="ar" dir="rtl" className="scroll-smooth">
+      <body className="bg-[#0B0C10] text-gray-100 min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white flex flex-col">
         <ErrorBoundary>
           <AuthProvider>
             <Sidebar>{children}</Sidebar>
           </AuthProvider>
         </ErrorBoundary>
         <Analytics />
+        <Toaster
+          position="bottom-left"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#fff',
+            }
+          }}
+        />
       </body>
     </html>
   );
