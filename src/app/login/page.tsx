@@ -7,44 +7,56 @@ import { signIn } from "@/lib/supabase-auth";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { Mail, Lock, Eye, EyeOff, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
   const { loginWithAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
 
-    if (!email.trim() || !email.includes("@")) { setError("البريد الإلكتروني غير صالح"); return; }
-    if (!password) { setError("كلمة المرور مطلوبة"); return; }
+    if (!email.trim() || !email.includes("@")) {
+      toast.error("البريد الإلكتروني غير صالح");
+      return;
+    }
+    if (!password) {
+      toast.error("كلمة المرور مطلوبة");
+      return;
+    }
 
     if (!isSupabaseConfigured()) {
-      setError("قاعدة البيانات غير مربوطة — تواصل مع مدير المنصة");
+      toast.error("قاعدة البيانات غير مربوطة — تواصل مع مدير المنصة");
       return;
     }
 
     setSubmitting(true);
-    const result = await signIn(email.trim(), password);
+    try {
+      const result = await signIn(email.trim(), password);
 
-    if (!result.success) {
-      setError(result.error?.message ?? "حدث خطأ");
+      if (!result.success) {
+        toast.error(result.error?.message ?? "بيانات الدخول غير صحيحة");
+        setSubmitting(false);
+        return;
+      }
+
+      toast.success("تم تسجيل الدخول بنجاح!");
+      loginWithAuth({
+        id: result.userId!,
+        email: result.email!,
+        name: "",
+      });
+
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ في الاتصال بالخادم. حاول مجدداً.");
       setSubmitting(false);
-      return;
     }
-
-    loginWithAuth({
-      id: result.userId!,
-      email: result.email!,
-      name: "",
-    });
-
-    router.push("/dashboard");
   }
 
   return (
@@ -70,13 +82,6 @@ export default function LoginPage() {
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
 
           <form onSubmit={handleSubmit} className="relative z-10">
-            {error && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl p-4 mb-6 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <p>{error}</p>
-              </motion.div>
-            )}
-
             <div className="space-y-5">
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2">البريد الإلكتروني</label>
@@ -87,7 +92,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="example@domain.com"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-left"
                     dir="ltr"
@@ -110,7 +115,7 @@ export default function LoginPage() {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pl-11 pr-12 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-left font-mono"
                     dir="ltr"

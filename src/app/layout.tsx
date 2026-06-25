@@ -4,6 +4,7 @@ import AuthProvider from "@/components/AuthProvider";
 import Sidebar from "@/components/Sidebar";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "أينكس للقدرات | منصة التعليم الذكية",
@@ -32,6 +33,18 @@ export default function RootLayout({
           </AuthProvider>
         </ErrorBoundary>
         <Analytics />
+        <Toaster
+          position="bottom-left"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#fff',
+            }
+          }}
+        />
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { signUp } from "@/lib/supabase-auth";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { Mail, Lock, Eye, EyeOff, Sparkles, AlertCircle, ArrowRight, User as UserIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,40 +16,45 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
 
-    if (!name.trim()) { setError("الاسم مطلوب"); return; }
-    if (!email.trim() || !email.includes("@")) { setError("البريد الإلكتروني غير صالح"); return; }
-    if (password.length < 6) { setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل"); return; }
-    if (password !== confirmPassword) { setError("كلمتا المرور غير متطابقتين"); return; }
+    if (!name.trim()) { toast.error("الاسم مطلوب"); return; }
+    if (!email.trim() || !email.includes("@")) { toast.error("البريد الإلكتروني غير صالح"); return; }
+    if (password.length < 6) { toast.error("كلمة المرور يجب أن تكون 6 أحرف على الأقل"); return; }
+    if (password !== confirmPassword) { toast.error("كلمتا المرور غير متطابقتين"); return; }
 
     if (!isSupabaseConfigured()) {
-      setError("قاعدة البيانات غير مربوطة — تواصل مع مدير المنصة");
+      toast.error("قاعدة البيانات غير مربوطة — تواصل مع مدير المنصة");
       return;
     }
 
     setSubmitting(true);
-    const result = await signUp(email.trim(), password, name.trim());
+    try {
+      const result = await signUp(email.trim(), password, name.trim());
 
-    if (!result.success) {
-      setError(result.error?.message ?? "حدث خطأ");
+      if (!result.success) {
+        toast.error(result.error?.message ?? "حدث خطأ أثناء إنشاء الحساب");
+        setSubmitting(false);
+        return;
+      }
+
+      toast.success("تم إنشاء الحساب بنجاح! جاري تحويلك لإكمال ملفك...");
+      loginWithAuth({
+        id: result.userId!,
+        email: result.email!,
+        name: name.trim(),
+      });
+
+      router.push("/onboarding");
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث عطل في الخادم. حاول مجدداً.");
       setSubmitting(false);
-      return;
     }
-
-    loginWithAuth({
-      id: result.userId!,
-      email: result.email!,
-      name: name.trim(),
-    });
-
-    router.push("/onboarding");
   }
 
   return (
@@ -74,13 +80,6 @@ export default function RegisterPage() {
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
 
           <form onSubmit={handleSubmit} className="relative z-10">
-            {error && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl p-4 mb-6 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <p>{error}</p>
-              </motion.div>
-            )}
-
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2">الاسم الكامل</label>
@@ -91,7 +90,7 @@ export default function RegisterPage() {
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => { setName(e.target.value); setError(""); }}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="أدخل اسمك"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pr-11 pl-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                     disabled={submitting}
@@ -108,7 +107,7 @@ export default function RegisterPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="example@domain.com"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-left"
                     dir="ltr"
@@ -126,7 +125,7 @@ export default function RegisterPage() {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pl-11 pr-12 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-left font-mono"
                     dir="ltr"
@@ -151,7 +150,7 @@ export default function RegisterPage() {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
-                    onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full bg-[#0B0C10]/50 border border-white/10 rounded-xl pl-11 pr-12 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-left font-mono"
                     dir="ltr"
