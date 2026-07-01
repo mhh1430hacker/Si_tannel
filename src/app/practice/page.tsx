@@ -88,7 +88,7 @@ export default function PracticePage() {
       setStats((s) => ({ ...s, wrong: s.wrong + 1 }));
     }
 
-    // Process through AI engine
+    // Process through AI engine (client-side)
     const newState = processAnswer(
       aiState,
       questionId,
@@ -101,6 +101,22 @@ export default function PracticePage() {
     );
     setAiState(newState);
     setAnsweredIds((prev) => { const next = new Set(Array.from(prev)); next.add(questionId); return next; });
+
+    // Edge adaptive engine (async, non-blocking)
+    fetch("/api/adaptive", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentId: user?.profile.id || "anon",
+        currentTheta: newState.irtTheta,
+        currentElo: newState.studentElo.rating,
+        questionDifficulty: q.difficulty === "\u0633\u0647\u0644" ? -1 : q.difficulty === "\u0635\u0639\u0628" ? 1 : 0,
+        isCorrect,
+        responseTimeMs: responseTime * 1000,
+        sessionQuestionsAnswered: stats.correct + stats.wrong + 1,
+        section,
+      }),
+    }).catch(() => {});
   }
 
   function nextQuestion() {

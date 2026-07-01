@@ -37,19 +37,46 @@ export default function AiChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function handleSend() {
+  async function handleSend() {
     if (!input.trim() || !user) return;
     const userMsg: AiMessage = { role: "user", text: input.trim(), timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, userMsg]);
+    const question = input.trim();
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const response = generateChatResponse(userMsg.text, user);
-      const aiMsg: AiMessage = { role: "ai", text: response, timestamp: new Date().toISOString() };
-      setMessages((prev) => [...prev, aiMsg]);
-      setIsTyping(false);
-    }, 400 + Math.random() * 600);
+    // Try server-side AI Coach first, fall back to client-side
+    try {
+      const analytics = await import("@/lib/user-store").then((m) => m.getPerformanceAnalytics(user));
+      const res = await fetch("/api/ai-coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: user.profile.id,
+          question,
+          context: {
+            currentScore: analytics.overallAccuracy,
+            weakAreas: analytics.weakAreas.map((w) => w.category),
+            recentErrors: [],
+            section: "kamy",
+            sessionCount: analytics.totalSessions,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.response) {
+        setMessages((prev) => [...prev, { role: "ai", text: data.response, timestamp: new Date().toISOString() }]);
+        setIsTyping(false);
+        return;
+      }
+    } catch {
+      // Fall through to client-side
+    }
+
+    // Client-side fallback
+    const response = generateChatResponse(question, user);
+    setMessages((prev) => [...prev, { role: "ai", text: response, timestamp: new Date().toISOString() }]);
+    setIsTyping(false);
   }
 
   if (loading || !user) {
